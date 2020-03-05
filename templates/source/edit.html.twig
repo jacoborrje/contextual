@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+{% block title %}Research database -> sources -> {{ source.title }}{% endblock %}
+{% block body %}
+    <script type="text/javascript">
+        function confirmDelete() {
+            return confirm('Are you sure you want to delete this source?');
+        }
+    </script>
+
+    <div id="index_area">
+        <h1>{{ source.title }}</h1>
+
+
+        <ul>
+            <li>Born {{ actor.fuzzyBirthdate.dateString }} in {{ actor.birthplace.name }}</li>
+            {% if(actor.occupations|length > 0) %}
+                {% for occupation in actor.occupations %}
+                    <li>{{ occupation.name }} at {{ occupation.institution.name }} {{ occupation.start_date }} - {{ occupation.end_date }}<li/>
+                {% endfor %}
+            {% endif %}
+            <li>Died {{ actor.fuzzyDateOfDeath.dateString }} in {{ actor.placeOfDeath.name }}</li>
+        </ul>
+        <p>
+            {{ actor.description|raw }}
+        </p>
+
+        <h3>Research notes</h3>
+        <p>
+            {{ actor.researchNotes|raw }}
+        </p>
+
+        <h3>Relatives</h3>
+        <ul>
+            {% for relationship in actor.relationships %}
+            <li> {{ relationship.typeString }}
+                <a href="{{ path('actor_view', {'actor_id':relationship.relatedActor.id}) }}">
+                    {{ relationship.relatedActor.firstName }} {{ relationship.relatedActor.surname }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+
+       {# <h3>Related sources</h3>
+        <?php if($actions):?>
+        <ul>
+
+            <?php foreach ($actions as $action): ?>
+            <li>
+                <?php echo $action['start_date'];?>,
+                <?php echo $action_verbs[$action['type']];?>
+                <a href="/research-database/index.php/sources/edit/<? echo $action['source']['id'];?>"><em><?php echo $action['source']['title'];?></em></a>
+            </li>
+            <?php endforeach; ?>
+        </ul>
+        <?php endif;?>#}
+
+        <a href="/research-database/index.php/actors/edit/<? echo $actor['id'];?>">Edit actor</a> <br />
+
+
+
+        <div id="mapid"></div>
+    </div>
+{% endblock %}
+
+
+
+{% block javascript %}
+    <script type="text/javascript">
+        var mymap = L.map('mapid').setView([55, 15], 4);
+        L.tileLayer('https://api.mapbox.com/styles/v1/jacoborrje/cjqm9usf748a12snpnsjkjqpq/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiamFjb2JvcnJqZSIsImEiOiJjanFtOWtwbmg2a2YwNDNwcGg2cG1sZzN1In0.c11tDOxEs5T5YHgbO0TAKg', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            maxZoom: 18,
+            id: 'mapbox.streets',
+            accessToken: 'pk.eyJ1IjoiamFjb2JvcnJqZSIsImEiOiJjanFtOWtwbmg2a2YwNDNwcGg2cG1sZzN1In0.c11tDOxEs5T5YHgbO0TAKg'
+        }).addTo(mymap);
+
+        var birthplace_icon = L.icon({
+            iconUrl: '<?php echo base_url();?>maps/born.png',
+
+            iconSize:     [18, 18], // size of the icon
+            iconAnchor:   [9, 9], // point of the icon which will correspond to marker's location
+            popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
+        });
+
+        var placeofdeath_icon = L.icon({
+            iconUrl: '<?php echo base_url();?>maps/death.png',
+
+            iconSize:     [18, 18], // size of the icon
+            iconAnchor:   [9, 9], // point of the icon which will correspond to marker's location
+            popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
+        });
+
+        var marker_birthplace;
+        <?php echo "marker_birthplace = L.marker([".$actor['birth_place']['lat'].", ".$actor['birth_place']['lng']."],{icon: birthplace_icon}).addTo(mymap);";?>
+        <?php echo 'marker_birthplace.bindPopup("<b>Born in '.$actor['birth_place']['name'].' in '.$actor['birthdate'].'</b>");';?>
+
+        <?php echo "marker_placeofdeath = L.marker([".$actor['place_of_death']['lat'].", ".$actor['place_of_death']['lng']."],{icon: placeofdeath_icon}).addTo(mymap);";?>
+        <?php echo 'marker_placeofdeath.bindPopup("<b>Died in '.$actor['place_of_death']['name'].' in '.$actor['date_of_death'].'</b>");';?>
+
+
+    </script>
+{% endblock %}

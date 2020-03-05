@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+{% block title %}Research database -> archives{% endblock %}
+{% block body %}
+
+    <div id="index_area">
+        <h3>Topics</h3>
+            <ul>
+                {% for topic in all_topics %}
+                    <li>{{ topic.topic }}</li>
+                {% endfor %}
+            </ul>
+    </div>
+    <div id="mapid"></div>
+
+
+
+    {#<h3>Create new Archive</h3>
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    {{ form_widget(form) }}
+    {{ form_end(form) }}#}
+{% endblock %}

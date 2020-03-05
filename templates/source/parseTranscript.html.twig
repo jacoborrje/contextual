@@ -1,0 +1,470 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Research database -> sources -> {{ source.title }}{% endblock %}
+{% block body %}
+    {% form_theme form 'form/sourceform.html.twig' %}
+    {% form_theme newTopicForm 'form/createSourceTopicForm.html.twig' %}
+    {% form_theme form.actions 'form/actionform.html.twig' %}
+    {% form_theme form.sourceTopics 'form/sourcetopicform.html.twig' %}
+    {% form_theme form.mentions 'form/mentionForm.html.twig' %}
+
+    <script type="text/javascript">
+        function confirmDelete() {
+            return confirm('Are you sure you want to delete this pdf?');
+        }
+    </script>
+
+        {{ form_errors(form) }}
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+        <div id="tabs">
+        <div id="action_menu">
+            <a href="{{ path('volume_view', {'volume_id':source.volume.id}) }}" onclick="return confirmClose($('form[name="source"]'))"><img class="icon" src="{{ asset('images/close.gif') }}" title="close" alt="close"/></a>
+            <input type="image" class="save_button" src="{{ asset('images/save.png') }}" alt="submit" name="submit" />
+            <span>Volume: {{ source.volumePath }}</span>
+        </div>
+        <ul>
+            <li><a href="#tabs-1">Metadata</a></li>
+            <li><a href="#tabs-2">Transcription</a></li>
+            <li><a href="#tabs-3">Research notes</a></li>
+            <li><a href="#tabs-4">Excerpt</a></li>
+            <li><a href="#tabs-5">Mentions</a></li>
+        </ul>
+
+        {# ***********  TAB 1 ********************** #}
+        <div id="tabs-1" class="form-style-10">
+             <div class="inner-wrap">
+                <div class="top_section">
+                    <p>
+                        {{ form_label(form.title) }}
+                        {{ form_errors(form.title) }}
+                        {{ form_widget(form.title) }}
+                        {{ form_help(form.title) }}
+
+                        {{ form_label(form.place_in_volume) }}
+                        {{ form_errors(form.place_in_volume) }}
+                        {{ form_widget(form.place_in_volume) }}
+                        {{ form_help(form.place_in_volume) }}
+                     </p>
+                     <p>
+                        {{ form_label(form.pages) }}
+                        {{ form_errors(form.pages) }}
+                        {{ form_widget(form.pages) }}
+                        {{ form_help(form.pages) }}
+
+                         {{ form_label(form.type) }}
+                         {{ form_errors(form.type) }}
+                         {{ form_widget(form.type) }}
+                         {{ form_help(form.type) }}
+                    </p>
+                    <p>
+                        {{ form_label(form.status) }}
+                        {{ form_errors(form.status) }}
+                        {{ form_widget(form.status) }}
+                        {{ form_help(form.status) }}
+
+                        {{ form_label(form.text_date) }}
+                        {{ form_errors(form.text_date) }}
+                        {{ form_widget(form.text_date) }}
+                        {{ form_help(form.text_date) }}
+                    </p>
+
+                    <div class="section">
+                    <h3 class="actionsHeader">Edit source actions </h3>
+                    <ul id="sourceActions" data-prototype="{{ form_widget(form.actions.vars.prototype)|e('html_attr') }}">
+                        {% for actionForm in form.actions %}
+                            <li class="actionForm">
+                                <span>{{ loop.index }}</span>
+                                {{ form_widget(actionForm) }}
+                            </li>
+                        {% endfor %}
+                     </ul>
+                    </div>
+                  </div>
+
+                  <h3>Topics</h3>
+                  <div id="sourceTopics" data-prototype="{{ form_widget(form.sourceTopics.vars.prototype)|e('html_attr') }}">
+                    {% for sourceTopicForm in form.sourceTopics %}
+                        <span id="topic{{ sourceTopicForm.vars.value.id }}" class="source_topic">
+                            {{ sourceTopicForm.vars.value.topic }}
+                            {{ form_widget(sourceTopicForm) }}
+                            {#<a href="#" onclick="return deleteTopic({{ sourceTopicForm.vars.value.id }},$(this));">x</a>#}
+                        </span>
+                    {% endfor %}
+                </div>
+                <div id="newTopic">
+                    {{ form_widget(newTopicForm) }}
+                </div>
+             </div>
+        </div>
+
+        {# ***********  TAB 2 ********************** #}
+        <div id="tabs-2">
+            {{ form_errors(form.transcription) }}
+            {{ form_widget(form.transcription) }}
+            {{ form_help(form.transcription) }}
+        </div>
+
+        {# ***********  TAB 3 ********************** #}
+        <div id="tabs-3">
+            {{ form_errors(form.research_notes) }}
+            {{ form_widget(form.research_notes) }}
+            {{ form_help(form.research_notes) }}
+        </div>
+
+
+        {# ***********  TAB 4 ********************** #}
+        <div id="tabs-4">
+            {{ form_errors(form.excerpt) }}
+            {{ form_widget(form.excerpt) }}
+            {{ form_help(form.excerpt) }}
+
+        </div>
+
+        {# ***********  TAB 5 ********************** #}
+        <div id="tabs-5" class="form-style-10">
+            {{ include('mentions/newMentionsLis.html.twig') }}
+             <div class="inner-wrap">
+                <div class="section">
+                    <h3 class="mentionsHeader">Mentions {#<a href="#" onclick="addSourceMention();"><img src="<?php echo base_url();?>img/add_18.png" alt="Add mention in source" title ="Add mention in source"/> </a>#}</h3>
+                    <ul id="sourceMentions" data-prototype="{{ form_widget(form.mentions.vars.prototype)|e('html_attr') }}">
+                        {% for mentionForm in form.mentions %}
+                            {% set mention = mentionForm.vars.value %}
+                            {{ include('mentions/mentionsPreview.html.twig') }}
+                            {{ include('mentions/mentionsCheckboxes.html.twig') }}
+                            <li id="mention{{ loop.index0 }}" class="mention">
+                                {{ form_widget(mentionForm) }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+             </div>
+        </div>
+        </div>
+    <div id="source_frame">
+    {% if source.files|length > 0 %}
+        <iframe style="float:left;" src="{{  source_dir ~ asset(source.files|first.pathname ) }}">
+        </iframe>
+    {% endif %}
+
+    <div id="source_info_box">
+        {% if source.files|length > 0 %}
+            {%  for sourceFile in source.files %}
+                {{ sourceFile.name}} <a href="{{ path('source_remove_file', {'source_id':source.id, 'file_id':sourceFile.id}) }}" onclick="return confirmDelete('pdf');">Delete</a>
+            {% endfor %}
+    </div>
+    </div>
+        {% else %}
+        <div id="no_uploaded_files">
+            <div class="box">
+                <div class="box__input">
+                        {{ form_row(form.file) }}
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+
+        </div>
+        {% endif %}
+    {{ form_widget(form._token) }}
+    {{ form_end(form, {'render_rest': false}) }}
+{% endblock %}
+
+{% block javascripts %}
+     <script>
+        $( function() {
+            $( "#tabs" ).tabs();
+        } );
+    </script>
+    <script>
+        var frm = $('form[name="source"]');
+        frm.trackChanges();
+        {# TODO: Fix source change tracking.#}
+    </script>
+    <script>
+        var $collectionHolder, $collectionHeader, $topicHolder, $newTopicSpan, $mentionsHolder, $mentionsHeader;
+
+        // setup an "add a tag" link
+        var $addActionButton = $('<a href="#" class="add_action_link"><img src="{{ asset('images/add_18.png') }}" alt="Add source action" title ="Add source action"/></a>');
+        var $addTopicButton = $('<a href="#" class="add_topic_link"><img src="{{ asset('images/add_18.png') }}" alt="Add source topic" title ="Add source topic"/></a>');
+        var $addMentionButton = $('<a href="#" class="add_mention_link"><img src="{{ asset('images/add_18.png') }}" alt="Add source mention" title ="Add source mention"/></a>');
+
+
+        var $newLinkLi = $addActionButton;
+        var $newMentionsLi = $('<li></li>');
+
+        jQuery(document).ready(function() {
+            /******************/
+            /* Set up actions */
+            /******************/
+
+            // Get the ul that holds the collection of tags
+            $collectionHolder = $('ul#sourceActions');
+            $collectionHeader = $('h3.actionsHeader');
+            // add the "add a tag" anchor and li to the tags ul
+            $collectionHeader.append($newLinkLi);
+
+            // count the current form inputs we have (e.g. 2), use that as the new
+            // index when inserting a new item (e.g. 2)
+            $collectionHolder.data('index', $collectionHolder.find(':input').length);
+
+            $addActionButton.on('click', function(e) {
+                // add a new tag form (see next code block)
+                addActionForm($collectionHolder);
+            });
+
+            $collectionHolder.find('li').each(function() {
+                addActionFormDeleteLink($(this));
+            });
+
+            /******************/
+            /* Set up topics  */
+            /******************/
+            $newTopicSpan = $('#newTopic');
+            $topicHolder = $('#sourceTopics');
+            $topicHolder.data('index', $topicHolder.find('input').length);
+
+            $addTopicButton.on('click', function(e) {
+                // add a new topic form (see next code block)
+                addTopicForm($topicHolder, $newTopicSpan);
+            });
+            $newTopicSpan.append($addTopicButton);
+
+            $topicHolder.find('span').each(function() {
+                addTopicFormDeleteLink($(this));
+            });
+
+            /*******************/
+            /* Set up mentions */
+            /*******************/
+
+            $mentionsHolder = $('ul#sourceMentions');
+            $mentionsHeader = $('h3.mentionsHeader');
+
+            $mentionsHeader.append($addMentionButton);
+
+            // count the current form inputs we have (e.g. 2), use that as the new
+            // index when inserting a new item (e.g. 2)
+            $mentionsHolder.data('index', $mentionsHolder.find('li').length/3);
+
+
+            $mentionsHolder.find('li.mention_preview').each(function() {
+                addMentionFormDeleteLink($(this));
+            });
+
+            $mentionsHolder.find('li.mentionCheckBoxes').each(function(){
+              var $actorCheck = $(this).find('input.actorCheck');
+              if($actorCheck.is(':checked')){
+                $actorCheck.parent().parent().next().find('.editActorMentionDropdown').attr('style','table-row')
+              }
+                var $institutionCheck = $(this).find('input.institutionCheck');
+                if($institutionCheck.is(':checked')){
+                    $institutionCheck.parent().parent().next().find('.editInstitutionMentionDropdown').attr('style','table-row')
+                }
+                var $placeCheck = $(this).find('input.placeCheck');
+                if($placeCheck.is(':checked')){
+                    $placeCheck.parent().parent().next().find('.editPlaceMentionDropdown').attr('style','table-row')
+                }
+                var $sourceCheck = $(this).find('input.sourceCheck');
+                if($sourceCheck.is(':checked')){
+                    $sourceCheck.parent().parent().next().find('.editSourceMentionDropdown').attr('style','table-row')
+                }
+
+
+            });
+
+            $addMentionButton.on('click', function(e) {
+                // add a new tag form (see next code block)
+                addMentionForm($mentionsHolder);
+            });
+
+
+
+        });
+
+        function addActionForm($collectionHolder) {
+            // Get the data-prototype explained earlier
+            var prototype = $collectionHolder.data('prototype');
+
+            // get the new index
+            var index = $collectionHolder.data('index');
+
+            var newForm = prototype;
+            newForm = newForm.replace(/__name__/g, index);
+
+            // increase the index with one for the next item
+            $collectionHolder.data('index', index + 1);
+
+            // Display the form in the page in an li, before the "Add a tag" link li
+            var $newFormLi = $('<li class="actionForm"></li>').append(newForm);
+            $collectionHolder.append($newFormLi);
+            // add a delete link to the new form
+            addActionFormDeleteLink($newFormLi);
+        }
+
+        function addActionFormDeleteLink($tagFormLi) {
+            var $removeFormButton = $('<a href="#">delete</a>');
+            $tagFormLi.append($removeFormButton);
+
+            $removeFormButton.on('click', function(e) {
+                // remove the li for the tag form
+                $tagFormLi.remove();
+            });
+        }
+
+        function addTopicForm($topicHolder) {
+            // Get the data-prototype explained earlier
+            var prototype = $topicHolder.data('prototype');
+
+            // get the new index
+            var index = $topicHolder.data('index');
+
+            var newForm = prototype;
+            newForm = newForm.replace(/__name__/g, index);
+
+            // Display the form in the page in an li, before the "Add a tag" link li
+
+            var $newFormLi = $('<span class="source_topic"></span>').append(newForm);
+            var textContent = $('#new_source_topic_topic').val();
+            $newFormLi.append(textContent);
+
+            // increase the index with one for the next item
+            $topicHolder.data('index', index + 1);
+
+            $topicHolder.append($newFormLi);
+
+            // set the correct value of the new topic
+            $('#source_sourceTopics_' + index + '_topic').val($('#new_source_topic_topicId').val());
+
+            $('#new_source_topic_topicId').val("");
+            $('#new_source_topic_topic').val("");
+
+            // add a delete link to the new form
+            addTopicFormDeleteLink($newFormLi);
+        }
+
+        function addTopicFormDeleteLink($topicFormLi) {
+            var $removeFormButton = $('<a href="#"> x</a>');
+            $topicFormLi.append($removeFormButton);
+
+            $removeFormButton.on('click', function(e) {
+                // remove the li for the tag form
+                $topicFormLi.remove();
+            });
+        }
+
+         function addMentionForm($mentionHolder) {
+            // Get the data-prototype explained earlier
+            var prototype = $mentionHolder.data('prototype');
+
+            // get the new index
+            var index = $mentionHolder.data('index');
+
+             var newForm = prototype;
+            newForm = newForm.replace(/__name__/g, index);
+
+            // increase the index with one for the next item
+             $mentionHolder.data('index', index + 1);
+
+            // Display the form in the page in an li, before the "Add a tag" link li
+            var $newMentionPreviewLi = $('#mention_index__preview').clone();
+             $newMentionPreviewLi.attr("id", $newMentionPreviewLi.attr("id").replace(/_index_/g, index));
+             $newMentionPreviewLi.html($newMentionPreviewLi.html().replace(/_index_/g, index));
+             $newMentionPreviewLi.removeClass("hidden");
+            $newMentionPreviewLi.addClass("mention_preview");
+
+
+             var $newMentionCheckboxesLi = $('#mentionCheckBoxes_index_').clone();
+            $newMentionCheckboxesLi.attr("id", $newMentionCheckboxesLi.attr("id").replace(/_index_/g, index));
+            $newMentionCheckboxesLi.html($newMentionCheckboxesLi.html().replace(/_index_/g, index));
+            $newMentionCheckboxesLi.removeClass("hidden");
+             $newMentionCheckboxesLi.addClass("mentionCheckboxes");
+
+             var $newMentionFormLi = $('<li id="mention'+index+'" class="newMention"></li>').append(newForm);
+
+             $mentionHolder.append($newMentionPreviewLi);
+            $mentionHolder.append($newMentionCheckboxesLi);
+            $mentionHolder.append($newMentionFormLi);
+             addMentionFormDeleteLink($newMentionPreviewLi, index);
+
+
+             // add a delete link to the new form
+        }
+
+        function addMentionFormDeleteLink($previewli) {
+            var $removeFormButton = $('<a href="#">delete</a>');
+            $previewli.append($removeFormButton);
+            var $checkboxesli = $previewli.next();
+            var $mentionformli = $checkboxesli.next();
+
+            $removeFormButton.on('click', function(e) {
+                // remove the li for the tag form
+                $previewli.remove();
+                $checkboxesli.remove();
+                $mentionformli.remove();
+            });
+        }
+
+        $(function(){
+            function log( message ) {
+                $( "<div>" ).text( message ).prependTo( "#log" );
+                $( "#log" ).scrollTop( 0 );
+            }
+
+            $("#new_source_topic_topic").autocomplete({
+                source: "{{ path('topic_autocomplete') }}",
+                minLength: 2,
+                focus: function( event, ui ) {
+                    $("#new_source_topic_topic").val( ui.item.topic? ui.item.topic : "" );
+                    $( "#new_source_topic_topicId" ).val( ui.item.id? ui.item.id : "" );
+                    return false;
+                },
+                select: function( event, ui ) {
+                    log( ui.item.topic ?
+                        "Selected: " + ui.item.topic + " aka " + ui.item.id :
+                        "Nothing selected, input was " + this.value );
+                    return false;
+                }
+            })
+            .autocomplete( "instance" )._renderItem = function( ul, item ) {
+                return $( "<li>" )
+                    .append( "<div>" + item.topic + "</div>" )
+                    .appendTo( ul );
+            };
+        });
+
+
+        var $form = $('.box');
+
+        var isAdvancedUpload = function() {
+            var div = document.createElement('div');
+            return (('draggable' in div) || ('ondragstart' in div && 'ondrop' in div)) && 'FormData' in window && 'FileReader' in window;
+        }();
+
+        if (isAdvancedUpload) {
+            $form.addClass('has-advanced-upload');
+
+            var droppedFiles = false;
+
+            $form.on('drag dragstart dragend dragover dragenter dragleave drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            })
+                .on('dragover dragenter', function() {
+                    $form.addClass('is-dragover');
+                })
+                .on('dragleave dragend drop', function() {
+                    $form.removeClass('is-dragover');
+                })
+                .on('drop', function(e) {
+                    $("input[type='file']")
+                        .prop("files", e.originalEvent.dataTransfer.files)  // put files into element
+                        .closest("form")
+                        .submit();  // autosubmit as well
+                });
+        }
+
+    </script>
+{% endblock %}

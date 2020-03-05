@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+{% block title %}Research database -> edit archive{% endblock %}
+{% block body %}
+    {% form_theme form 'form/editSeriesForm.html.twig' %}
+
+    <?php if($parent_archive&&($serie['id']!=452&&$serie['id']!=453)):?>
+    {% if series.archive %}
+        Parent archive:
+        <a href="{{ path('archive_view', {'archive_id':series.archive.id}) }}">
+            {{ series.archive.name }}
+        </a><br>
+    {% endif %}
+    {% if series.parent %}
+        Parent series:
+        <a href="{{ path('series_view', {'series_id':series.parent.id}) }}">
+            {{ series.parent.name }}
+        </a>
+    {% endif %}
+
+    <h3>Edit series</h3>
+    <ul>
+        <li>
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            {{ form_widget(form) }}
+            {{ form_end(form) }}
+        </li>
+    </ul>
+{% endblock %}

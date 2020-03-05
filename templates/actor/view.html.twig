@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+{% block title %}Research database -> archives -> {{ archive.name }} {% endblock %}
+{% block body %}
+    <script type="text/javascript">
+        function confirmDelete() {
+            return confirm('Are you sure you want to delete this archive?');
+        }
+    </script>
+
+    <div id="index_area">
+        <h3>{{ archive.name }}</h3>
+        {% import "archive/archiveHierarchy.html.twig" as list %}
+        {{ list.archiveHierary(archive.children) }}
+    </div>
+
+{% endblock %}

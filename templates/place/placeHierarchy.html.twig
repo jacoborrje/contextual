@@ -1,0 +1,11 @@
+{% macro placeHierary(places) %}
+    {% import _self as list %}
+    <ul>
+        {% for place in places %}
+            <li>{{ place.name }}</li>
+            {% if place.children|length > 0 %}
+                {{ list.placeHierary(place.children) }}
+            {% endif %}
+        {% endfor %}
+    </ul>
+{% endmacro %}

@@ -1,0 +1,17 @@
+{% macro seriesHierary(series) %}
+    {% import _self as list %}
+    <ul>
+        {% for serie in series %}
+            <li><a href="{{ path('serie_view', {'serie_id':serie.id}) }}">{{ serie.name }}</a></li>
+            {% if serie.children|length > 0 %}
+                {{ list.serieHierary(serie.children) }}
+            {% endif %}
+        {% endfor %}
+    </ul>
+{% endmacro %}
+
+
+
+
+{% import _self as serieHierarchy %}
+

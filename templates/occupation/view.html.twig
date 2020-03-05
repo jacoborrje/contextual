@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+{% block title %}Research database -> topics -> {{ topic.topic }} {% endblock %}
+
+{% block body %}
+
+    <div id="index_area">
+        <h1>{{ topic.topic }}</h1>
+        {% if(topic.sources|length>0) %}
+        <h3>Sources with this topic:</h3>
+        <ul>
+        {% for sourceTopic in topic.sources %}
+            <li> <a href="{{ path('source_edit', {'source_id':sourceTopic.source.id}) }}">{{ sourceTopic.source.title }}</a></li>
+        {% endfor %}
+        </ul>
+        {% else %}
+            <h3>There are no sources with this topic yet.</h3>
+        {% endif %}
+    </div>
+
+{% endblock %}
+

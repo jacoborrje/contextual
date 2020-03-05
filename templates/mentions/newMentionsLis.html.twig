@@ -1,0 +1,10 @@
+{% block newMentionsCheckboxes %}
+    <li id="newMentionsCheckboxes" class="hidden">
+        <p>
+            <label>Actor</label><input type="checkbox" name="actor" value="actorCheck" id="actorCheck" onclick="toggleDropdownActivation(this, $('#editActorMentionDropdown_index__actor'),'table-row')">
+            <label>Institution</label><input type="checkbox" name="institution" value="institutionCheck" id="institutionCheck" onclick="toggleDropdownActivation(this, $('#editInstitutionMentionDropdown_index_'),'table-row')">
+            <label>Place</label><input type="checkbox" name="place" value="placeCheck" id="placeCheck" onclick="toggleDropdownActivation(this, $('#editPlaceMentionDropdown_index_'),'table-row')">
+            <label>Source</label><input type="checkbox" name="source" checked {% endif %} value="sourceCheck" id="sourceCheck" onclick="toggleDropdownActivation(this, $('#editSourceMentionDropdown_index_'),'table-row')">
+        </p>
+    </li>
+{% endblock %}

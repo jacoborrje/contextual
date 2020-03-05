@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+{% block title %}Research database -> institutions -> {{ institution.name }} {% endblock %}
+
+{% block body %}
+
+    <div id="index_area">
+        <h1>{{ institution.name }}</h1>
+        <h3>Research notes</h3>
+        <p>
+            {{ institution.researchNotes|raw }}
+        </p>
+        <h3>Mentions of the institution</h3>
+        <a>
+            {% for mention in institution.mentions %}
+            Mentioned in {{ mention.infoSource.title }}, sent by
+            {% for author in mention.infosource.authors %}
+            {% if author.correspondent.institution is not null %}
+            <a href="{{ path('institution_view', {'institution_id':author.correspondent.institution.id}) }}">
+                {% else %}
+                <a href="{{ path('institution_view', {'institution_id':author.correspondent.institution.id}) }}">
+                    {% endif %}
+                    {% if not loop.last %}
+                    {{ author.correspondent }}</a>,
+                {% elseif not loop.first %}
+                and {{ author.correspondent }}</a>
+            {% else %}
+            {{ author.correspondent }}
+        </a>
+        {% endif %}
+        {% endfor %}
+        in {{ mention.infoSource.textDate }}
+        {% endfor %}
+
+
+        {% if institution.actions %}
+            <h3>Related sources</h3>
+            <ul>
+                {% for action in institution.actions %}
+                    <?php foreach ($actions as $action): ?>
+                    <li>
+                        {{ action.textStartDate }}
+                        <?php echo $action['start_date'];?>,
+                        {{ action.typeVerbImperfect }}
+                        <a href="{{ path('source_edit', {'source_id':action.source.id}) }}"><em>{{ action.source.title }}</em></a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+    </div>
+
+{% endblock %}
+

@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Research database -> sources -> {{ source.title }}{% endblock %}
+{% block body %}
+    <div id="tabs">
+    {% form_theme entitiesForm 'form/parseTranscriptForm.html.twig' %}
+    <a href="{{ path('source_edit', {'source_id':source.id}) }}">Back</a>
+    {{ form_start(entitiesForm, {'attr': {'novalidate': 'novalidate'}}) }}
+    {{ form_widget(entitiesForm) }}
+    {{ form_end(entitiesForm) }}
+    </div>
+
+    <div id="tabs2">
+        <div class="transcription">
+        {{ source.transcription|raw }}
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+     <script>
+        $( function() {
+            $( "#tabs" ).tabs();
+        } );
+    </script>
+    <script>
+        var frm = $('form[name="source"]');
+        frm.trackChanges();
+        {# TODO: Fix source change tracking.#}
+    </script>
+{% endblock %}

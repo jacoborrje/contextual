@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+{% block title %}Research database -> archives{% endblock %}
+{% block body %}
+    <script type="text/javascript">
+        function confirmDelete() {
+            return confirm('Are you sure you want to delete this archive?');
+        }
+    </script>
+
+    <div id="index_area">
+        {% import "archive/archiveHierarchy.html.twig" as list %}
+        {{ list.archiveHierary(archives) }}
+    </div>
+
+
+        <h3>Create new Archive</h3>
+    <ul>
+        <li>
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            {{ form_widget(form) }}
+            {{ form_end(form) }}
+        </li>
+    </ul>
+{% endblock %}

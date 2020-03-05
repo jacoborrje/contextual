@@ -1,0 +1,76 @@
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoiamFjb2JvcnJqZSIsImEiOiJjanFtOWtwbmg2a2YwNDNwcGg2cG1sZzN1In0.c11tDOxEs5T5YHgbO0TAKg';
+    var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/jacoborrje/cjslfs6640gc61gk4nrw1hagf',
+    center: [{{ place.lng }},{{ place.lat }}],
+    zoom: 6
+});
+
+    map.flyTo({center: [{{ place.lng }}, {{ place.lat }}], {% if place.parent is not null %} zoom: 12 {% else %} zoom: 6 {% endif %} });
+    map.on('load', function () {
+    var el = document.createElement('div');
+    el.className = 'marker selected';
+    el.id = 'edit_place_marker';
+
+    var marker = new mapboxgl.Marker(el)
+    .setLngLat([{{ place.lng }},{{ place.lat }}])
+    .addTo(map);
+    marker.on('drag', function () {
+    $('#place_lng').val(marker.getLngLat().lng);
+    $('#place_lat').val(marker.getLngLat().lat);
+});
+
+    getOverlayMap({{ place.id }});
+});
+
+    var lng_input = 'place_lng';
+    var lat_input = 'place_lat';
+    map.on('click', addDraggableMarker);
+
+    var $place_parent_select = $('#place_parent');
+
+    $place_parent_select.on('change', function (){
+    if($place_parent_select.val())
+    updatePlaceParent($place_parent_select.val());
+    else{
+    var mapLayer = map.getLayer('place_overlay');
+    if(typeof mapLayer !== 'undefined') {
+    map.removeLayer('place_overlay').removeSource('place_overlay');
+    map.flyTo({center: [0,60], zoom: 3});
+
+}
+}
+});
+
+    var $form = $('.box');
+
+    var isAdvancedUpload = function() {
+    var div = document.createElement('div');
+    return (('draggable' in div) || ('ondragstart' in div && 'ondrop' in div)) && 'FormData' in window && 'FileReader' in window;
+}();
+
+    if (isAdvancedUpload) {
+    $form.addClass('has-advanced-upload');
+
+    var droppedFiles = false;
+
+    $form.on('drag dragstart dragend dragover dragenter dragleave drop', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+})
+    .on('dragover dragenter', function() {
+    $form.addClass('is-dragover');
+})
+    .on('dragleave dragend drop', function() {
+    $form.removeClass('is-dragover');
+})
+    .on('drop', function(e) {
+    $("input[type='file']")
+    .prop("files", e.originalEvent.dataTransfer.files)  // put files into element
+    .closest("form")
+    .submit();  // autosubmit as well
+});
+}
+    {# ---------------------------------------- #}
+</script>

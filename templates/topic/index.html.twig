@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+{% block title %}Research database -> archives{% endblock %}
+{% block body %}
+
+    <div id="index_area">
+        <h3>Places</h3>
+            {% import "place/placeHierarchy.html.twig" as list %}
+            {{ list.placeHierary(places) }}
+    </div>
+    <div id="mapid"></div>
+
+
+
+    {#<h3>Create new Archive</h3>
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    {{ form_widget(form) }}
+    {{ form_end(form) }}#}
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript">
+        var mymap = L.map('mapid').setView([55, 15], 4);
+        L.tileLayer('https://api.mapbox.com/styles/v1/jacoborrje/cjqm9usf748a12snpnsjkjqpq/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiamFjb2JvcnJqZSIsImEiOiJjanFtOWtwbmg2a2YwNDNwcGg2cG1sZzN1In0.c11tDOxEs5T5YHgbO0TAKg', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            maxZoom: 18,
+            id: 'mapbox.streets',
+            accessToken: 'pk.eyJ1IjoiamFjb2JvcnJqZSIsImEiOiJjanFtOWtwbmg2a2YwNDNwcGg2cG1sZzN1In0.c11tDOxEs5T5YHgbO0TAKg'
+        }).addTo(mymap);
+
+        var redDot = L.icon({
+            iconUrl: '{{ asset('images/dot.png') }}',
+
+            iconSize:     [10, 10], // size of the icon
+            iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+            popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
+        });
+
+
+        var marker = new Array();
+        {% set i = 0 %}
+        {% for place in all_places %}
+            marker[{{ i }}] = L.marker([{{ place.lat }}, {{ place.lng }}],{icon: redDot}).addTo(mymap);
+            marker[{{ i }}].bindPopup("<b>{{ place.name }}</b>");
+            {% set i = i + 1 %}
+        {% endfor %}
+    </script>
+{% endblock %}

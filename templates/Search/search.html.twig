@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+{% block title %}Research database -> search -> {{ searchQuery }} {% endblock %}
+
+{% block body %}
+
+    <div id="index_area">
+        {% if(foundSources) %}
+        <h2>Search results:</h2>
+        <table class="object_table">
+            {% for result in foundSources %}
+                {% set source = result[0] %}
+                <tr>
+                    <td>{{ source.textDate }}</td>
+                    <td>
+                        <a href="{{ path('source_edit', {'source_id':source.id}) }}">{{ source.listTitle }}</a>
+                    </td>
+                    <td>{% if source.files|length > 0 %} <img src="{{ asset('images/pdf.png')}}" title="has pdf" alt="has pdf"> {% endif %}</td>
+                    <td>{% if source.hasTranscription %} <img src="{{ asset('images/transcription.png')}}" title="has transcription" alt="has transcription"> {% endif %}</td>
+                    <td>{% if source.hasTopics %} <img src="{{ asset('images/topics.png')}}" title="has topics" alt="has topics"> {% endif %}</td>
+                    <td>{% if source.hasActions %} <img src="{{ asset('images/actions.png')}}" title="has actions" alt="has actions"> {% endif %}</td>
+                    <td>{{ source.placeInVolume }}</td>
+                    <td>{{ source.shortLanguageString }}</td>
+                </tr>
+                {% endfor %}
+        </table>
+        {% endif %}
+    </div>
+
+{% endblock %}

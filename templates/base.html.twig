@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{% block title %}Welcome!{% endblock %}</title>
+        {% block meta %}
+            <meta charset="UTF-8">
+        {% endblock %}
+        {% block stylesheets %}
+            <link rel="stylesheet" type="text/css" media="screen" href="{{ asset('css/style.css') }}">
+            <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700,700i|Voltaire" rel="stylesheet">
+        {% endblock %}
+        {% block javascripts %}
+            {# These libraries are loaded on every page #}
+            <script src="{{ asset('js/researchDatabase.js') }}"></script>
+            <script src="{{ asset('js/jquery-3.4.1.js') }}"></script>
+            <script src="{{ asset('bundles/fosjsrouting/js/router.min.js') }}"></script>
+            <script src="{{ path('fos_js_routing_js', { callback: 'fos.Router.setData' }) }}"></script>
+            {# ---------------------------------------- #}
+        {% endblock %}
+    </head>
+    <body>
+    {% block topmenu %}
+        <ul id="top_menu">
+            {% import _self as menuItems %}
+
+            {{ menuItems.menuItem('Home', path('home_index')) }}
+            {{ menuItems.menuItem('Search', path('search')) }}
+            {{ menuItems.menuItem('Archive', path('archive_index')) }}
+            {{ menuItems.menuItem('Books', path('series_view', {'series_id':469})) }}
+            {{ menuItems.menuItem('Actors', path('actor_index')) }}
+            {{ menuItems.menuItem('Topics', path('topic_index')) }}
+            {{ menuItems.menuItem('Places', path('place_index')) }}
+            {{ menuItems.menuItem('Occupations', path('occupation_index')) }}
+            {{ menuItems.menuItem('Institutions', path('institution_index')) }}
+            {{ menuItems.menuItem('Import', path('import_index')) }}
+            {{ menuItems.menuItem('Relationships', path('relationships_index')) }}
+            {{ menuItems.menuItem('Preferences', path('preferences_index')) }}
+        </ul>
+        <div id="main_text_area">
+    {% endblock %}
+    {% block body %}
+    {% endblock %}
+
+        </div>
+
+    </body>
+    {% block customJavascripts %}
+    {% endblock %}
+</html>
+
+
+
+{% macro menuItem(name, url) %}
+    {% spaceless %}
+        {% set currentUrl = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
+        {% set isActive = currentUrl == url %}
+
+        <li{% if isActive %} class="is-active"{% endif %}>
+            <a href="{{ url }}">{{ name|trans() }}</a>
+        </li>
+    {% endspaceless %}
+{% endmacro %}
