@@ -1,44 +1,51 @@
-{# templates/form/actionform.html.twig #}
+{# templates/form/sourceform.html.twig #}
+{% block _source_widget %}
+<p>
+    {{ form_label(form.title) }}
+    {{ form_errors(form.title) }}
+    {{ form_widget(form.title) }}
+    {{ form_help(form.title) }}
+</p>
+<p>
+    {{ form_label(form.place_in_volume) }}
+    {{ form_errors(form.place_in_volume) }}
+    {{ form_widget(form.place_in_volume) }}
+    {{ form_help(form.place_in_volume) }}
+</p>
+<p>
+    {{ form_label(form.pages) }}
+    {{ form_errors(form.pages) }}
+    {{ form_widget(form.pages) }}
+    {{ form_help(form.pages) }}
 
-{% block _source_actions_entry_widget %}
-    <li>
-        <span>a</span>
-        <p>
-            {{ form_widget(form.id) }}
-        </p>
-        <p>
-            {{ form_label(form.text_start_date) }}
-            {{ form_errors(form.text_start_date) }}
-            {{ form_widget(form.text_start_date) }}
-            {{ form_help(form.text_start_date) }}
+    {{ form_label(form.type) }}
+    {{ form_errors(form.type) }}
+    {{ form_widget(form.type) }}
+    {{ form_help(form.type) }}
+</p>
+<p>
+    {{ form_label(form.status) }}
+    {{ form_errors(form.status) }}
+    {{ form_widget(form.status) }}
+    {{ form_help(form.status) }}
 
-            {{ form_label(form.text_end_date) }}
-            {{ form_errors(form.text_end_date) }}
-            {{ form_widget(form.text_end_date) }}
-            {{ form_help(form.text_end_date) }}
-        </p>
-        <p>
-            {{ form_label(form.correspondent) }}
-            {{ form_errors(form.correspondent) }}
-            {{ form_widget(form.correspondent) }}
-            {{ form_help(form.correspondent) }}
+    {{ form_label(form.text_date) }}
+    {{ form_errors(form.text_date) }}
+    {{ form_widget(form.text_date) }}
+    {{ form_help(form.text_date) }}
+</p>
+<p>
+    {{ form_widget(form.submit) }}
+</p>
+{% endblock %}
 
-            {{ form_label(form.type) }}
-            {{ form_errors(form.type) }}
-            {{ form_widget(form.type) }}
-            {{ form_help(form.type) }}
-        </p>
-        <p>
-            {{ form_label(form.place) }}
-            {{ form_errors(form.place) }}
-            {{ form_widget(form.place) }}
-            {{ form_help(form.place) }}
-        </p>
-        <p>
-            {{ form_label(form.description) }}
-            {{ form_errors(form.description) }}
-            {{ form_widget(form.description) }}
-            {{ form_help(form.description) }}
-        </p>
-    </li>
+
+{% block _source_file_row %}
+
+    {{ form_widget(form.fileContents) }}
+    <label for="source_file_fileContents">
+        <strong>Choose a pdf file </strong><span class="box__dragndrop"> or drag it here</span>. If you drag <strong>multiple image files</strong>, they will be combined into a pdf.<br>
+        <img src="{{ asset('images/upload.png') }}" alt="Upload" class="uploadIcon"/>
+    </label>
+
 {% endblock %}

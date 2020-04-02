@@ -9,14 +9,13 @@
 namespace App\Form\Type;
 
 
-use App\Form\DataTransformer\ActorAutocompleteTransformer;
-use App\Form\DataTransformer\InstitutionAutocompleteTransformer;
+use App\Form\DataTransformer\OccupationAutocompleteTransformer;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-class InstitutionAutocompleteType extends AbstractType
+class OccupationAutocompleteType extends AbstractType
 {
     protected $em;
 
@@ -26,7 +25,7 @@ class InstitutionAutocompleteType extends AbstractType
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options) {
-        $autocompleteTransformer = new InstitutionAutocompleteTransformer($this->em);
+        $autocompleteTransformer = new OccupationAutocompleteTransformer($this->em);
 
         $builder
             ->addModelTransformer($autocompleteTransformer)
@@ -38,7 +37,7 @@ class InstitutionAutocompleteType extends AbstractType
     }
 
     public function getName() {
-        return 'InstitutionAutocomplete';
+        return 'OccupationAutocomplete';
     }
 
 }

@@ -8,143 +8,98 @@
  */
 
 namespace App\Controller;
-use App\Form\ImportURLType;
+use App\Entity\MapOverlay;
+use App\Entity\Source;
+use App\Utils\ActorService;
+use App\Utils\Analysis\TextAnalysisService;
+use App\Utils\CorrespondentService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
-use App\Entity\Source;
-use App\Entity\Series;
-use App\Entity\Volume;
-use App\Form\SourceType;
-use App\Form\VolumeType;
-use App\Entity\ImportURL;
-use App\Utils\Scrapers\AlvinSourceScraper;
+use App\Utils\Analysis\TopicService;
 
-class VolumeController extends AbstractController
+class PreferencesController extends AbstractController
 {
     /**
-    *   @Route("/volume/index", name="volume_index")
+    *   @Route("/preferences/index", name="preferences_index")
     */
     public function index(){
-
-    }
-
-
-    /**
-     *   @Route("/volume/view/{volume_id}", name="volume_view")
-     */
-    public function view($volume_id, Request $request, AlvinSourceScraper $scraper){
         $repository = $this->getDoctrine()
-            ->getRepository(Volume::class);
-        $volume = $repository->find($volume_id);
+            ->getRepository(MapOverlay::class);
 
-         if ($volume_id == 863){
-             $is_alvin = true;
-         }
-         else{
-             $is_alvin = false;
-         }
-
-        $child_source = new Source();
-        $child_source->setVolume($volume);
-
-        $form = $this->createForm(SourceType::class, $child_source);
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            // $form->getData() holds the submitted values
-            // but, the original `$task` variable has also been updated
-            $source = $form->getData();
-            $source->setDateByString($source->getTextDate());
-
-            // ... perform some action, such as saving the task to the database
-            // for example, if Task is a Doctrine entity, save it!
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($source);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('volume_view', array('volume_id' => $volume_id));
-        }
-
-        if($is_alvin){
-            $alvinImportForm = $this->createForm(ImportURLType::class);
-            $alvinImportForm->handleRequest($request);
-
-            if ($alvinImportForm->isSubmitted() && $alvinImportForm->isValid()) {
-                $alvinID = $alvinImportForm->getData();
-                $scraper->connect($alvinID->getURL());
-                $source = $scraper->parse();
-
-                $entityManager = $this->getDoctrine()->getManager();
-                //$entityManager->persist($source);
-                //$entityManager->flush();
-
-                //return $this->redirectToRoute('volume_view', array('volume_id' => $volume_id));
-            }
-
-            return $this->render('volume/view.html.twig', [
-                'volume' => $volume,
-                'form' => $form->createView(),
-                'alvinImportForm' =>$alvinImportForm->createView()
-            ]);
-        }
+        $mapOverlays = $repository->findAll();
 
 
-        return $this->render('volume/view.html.twig', [
-            'volume' => $volume,
-            'form' => $form->createView(),
-        ]);
+        return $this->render('preferences/index.html.twig', [
+                'mapOverlays' => $mapOverlays
+            ]
+        );
     }
 
     /**
-     *   @Route("/volume/delete/{volume_id}", name="volume_delete")
+     *   @Route("/preferences/retrainTopicModels", name="preferences_retrainTopicModels")
      */
-    public function delete($volume_id, Request $request){
+    public function retrainTopicModels(TopicService $topicService){
+        $topicService->trainModels();
+        return $this->redirectToRoute('preferences_index');
+    }
+
+    /**
+     *   @Route("/preferences/generateStopwordSuggestions", name="preferences_generateStopwordSuggestions")
+     */
+    public function generateStopwordSuggestions(TextAnalysisService $textAnalysisService){
+        $textAnalysisService->generateStopwordSuggestions();
+        return $this->redirectToRoute('preferences_index');
+    }
+
+    /**
+     *   @Route("/preferences/generateLemmatizationDraft", name="preferences_generateLemmatizationDraft")
+     */
+    public function generateLemmatizationDraft(TextAnalysisService $textAnalysisService){
+        $textAnalysisService->generateLemmatizationDraft();
+        return $this->redirectToRoute('preferences_index');
+    }
+
+
+    /**
+     *   @Route("/preferences/mergeActorDuplicates", name="preferences_mergeActorDuplicates")
+     */
+    public function mergeActorDuplicated(ActorService $actorService){
+        $actorService->mergeActorDuplicates();
+        return $this->redirectToRoute('preferences_index');
+    }
+
+    /**
+     *   @Route("/preferences/purgeDuplicateCorrespondents", name="preferences_purgeDuplicateCorrespondents")
+     */
+    public function purgeDuplicateCorrespondents(CorrespondentService $correspondentService){
+        $correspondentService->purgeDuplicateCorrespondents();
+        //return $this->redirectToRoute('preferences_index');
+    }
+
+    /**
+     *   @Route("/preferences/decodeHTMLEntitiesInDatabase", name="preferences_decodeHTMLEntitiesInDatabase")
+     */
+    public function decodeHTMLEntitiesInDatabase(CorrespondentService $correspondentService){
+        $sourceRepository = $this->getDoctrine()
+            ->getRepository(Source::class);
+
+        $allSources = $sourceRepository->findAll();
         $entityManager = $this->getDoctrine()->getManager();
-        $volume = $entityManager->getRepository(Volume::class)->find($volume_id);
 
-        if (!$volume) {
-            throw $this->createNotFoundException(
-                'No volume found for id '.$volume_id
-            );
+        foreach($allSources as $source){
+            if($source->getTranscription() !== "") {
+                $source->setTranscription(html_entity_decode($source->getTranscription()));
+                $entityManager->persist($source);
+
+            }
         }
-
-        $entityManager->remove($volume);
         $entityManager->flush();
-
-        $referer = $request->headers->get('referer');
-
-        return $this->redirect($referer);
+        return $this->redirectToRoute('preferences_index');
     }
 
-    /**
-     *   @Route("/volume/edit/{volume_id}", name="volume_edit")
-     */
-    public function edit($volume_id, Request $request){
-        $repository = $this->getDoctrine()
-            ->getRepository(Volume::class);
-        $volume = $repository->find($volume_id);
-        $form = $this->createForm(VolumeType::class, $volume);
-
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            // $form->getData() holds the submitted values
-            // but, the original `$task` variable has also been updated
-            $volume = $form->getData();
-
-            // ... perform some action, such as saving the task to the database
-            // for example, if Task is a Doctrine entity, save it!
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($volume);
-            $entityManager->flush();
-        }
-
-        return $this->render('volume/edit.html.twig', [
-            'volume' => $volume,
-            'form' => $form->createView()
-        ]);
-    }
 
 }
+
+

@@ -13,13 +13,13 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
-class PreferencesController extends AbstractController
+class ImportController extends AbstractController
 {
     /**
-    *   @Route("/preferences/index", name="preferences_index")
+    *   @Route("/import/index", name="import_index")
     */
     public function index(){
-        return $this->render('preferences/index.html.twig');
+        return $this->render('import/index.html.twig');
 
     }
 

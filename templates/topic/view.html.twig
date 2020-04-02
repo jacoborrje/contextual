@@ -1,32 +1,25 @@
 {% extends 'base.html.twig' %}
-{% block title %}Research database -> archives -> {{ archive.name }} {% endblock %}
+{% block title %}Research database -> topics -> {{ topic.topic }} {% endblock %}
 
 {% block body %}
 
     <div id="index_area">
-
-        {% if archive.parent %}
-            Parent archive:
-            <a href="{{ path('archive_view', {'archive_id':archive.parent.id}) }}">
-                {{ archive.parent.name }}
-            </a>
+        <h1>{{ topic.topic }}</h1>
+        {% if(topic.sources|length>0) %}
+        <h3>Sources with this topic:</h3>
+        <ul>
+        {% for sourceTopic in topic.sources %}
+            {% if sourceTopic.source is not null %}
+            <li>
+                {{ sourceTopic.source.textDate }} <a href="{{ path('source_edit', {'source_id':sourceTopic.source.id}) }}">{{ sourceTopic.source.sourceString }}</a>
+            </li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+        {% else %}
+            <h3>There are no sources with this topic yet.</h3>
         {% endif %}
-
-        <h3>{{ archive.name }}</h3>
-        {% import "archive/archiveHierarchy.html.twig" as list %}
-        {{ list.archiveHierary(archive.children) }}
-
-        {% import "series/seriesHierarchy.html.twig" as seriesList %}
-        {{ seriesList.seriesHierarchy(archive.series) }}
-
     </div>
 
 {% endblock %}
 
-{% block javascripts %}
-    <script type="text/javascript">
-        function confirmDelete() {
-            return confirm('Are you sure you want to delete this archive?');
-        }
-    </script>
-{% endblock %}

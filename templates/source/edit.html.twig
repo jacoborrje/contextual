@@ -1,102 +1,259 @@
 {% extends 'base.html.twig' %}
+
 {% block title %}Research database -> sources -> {{ source.title }}{% endblock %}
+{% block meta %}
+    {{ parent() }}
+    <link rel="schema.dcterms" href="http://purl.org/dc/terms/" >
+    <link rel="schema.z" href="http://www.zotero.org/namespaces/export#" >
+    <link rel="schema.bib" href="http://purl.org/net/biblio#" >
+
+
+    <meta name="dcterms.type" content="{{ source.typeString }}" >
+    <meta name="dcterms.language" content="{{ source.languageString }}" >
+    <meta name="dcterms.title" content="{{ source.title }}" >
+    <meta name="dcterms.date" content="{{ source.date }}" >
+    <meta name="dcterms.creator" content="{{ source.authorsAsString }}" >
+    <meta name="dcterms.abstract" content="{{ source.excerpt }}" >
+    <meta name="z.recipients" content="{{ source.recipientsAsString }}" >
+    <meta name="z.archive" content="{{ source.archive }}" >
+    <meta name="dc.coverage" content="{{ source.sourcePath }}" >
+
+
+{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ asset('js/jquery-ui-1.12.1/jquery-ui.css') }}">
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ asset('js/jquery-ui-1.12.1/jquery-ui.theme.css') }}">
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ asset('js/jquery-ui-1.12.1/jquery-ui.structure.css') }}">
+
+{% endblock %}
+
 {% block body %}
+    {% form_theme form 'form/sourceform.html.twig' %}
+    {% form_theme newTopicForm 'form/createSourceTopicForm.html.twig' %}
+    {% form_theme form.actions 'form/actionform.html.twig' %}
+    {% form_theme form.sourceTopics 'form/sourcetopicform.html.twig' %}
+    {% form_theme form.mentions 'form/mentionForm.html.twig' %}
+
     <script type="text/javascript">
         function confirmDelete() {
-            return confirm('Are you sure you want to delete this source?');
+            return confirm('Are you sure you want to delete this pdf?');
         }
     </script>
 
-    <div id="index_area">
-        <h1>{{ source.title }}</h1>
+        {{ form_errors(form) }}
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
-
-        <ul>
-            <li>Born {{ actor.fuzzyBirthdate.dateString }} in {{ actor.birthplace.name }}</li>
-            {% if(actor.occupations|length > 0) %}
-                {% for occupation in actor.occupations %}
-                    <li>{{ occupation.name }} at {{ occupation.institution.name }} {{ occupation.start_date }} - {{ occupation.end_date }}<li/>
-                {% endfor %}
-            {% endif %}
-            <li>Died {{ actor.fuzzyDateOfDeath.dateString }} in {{ actor.placeOfDeath.name }}</li>
-        </ul>
-        <p>
-            {{ actor.description|raw }}
-        </p>
-
-        <h3>Research notes</h3>
-        <p>
-            {{ actor.researchNotes|raw }}
-        </p>
-
-        <h3>Relatives</h3>
-        <ul>
-            {% for relationship in actor.relationships %}
-            <li> {{ relationship.typeString }}
-                <a href="{{ path('actor_view', {'actor_id':relationship.relatedActor.id}) }}">
-                    {{ relationship.relatedActor.firstName }} {{ relationship.relatedActor.surname }}
-                </a>
-            </li>
-            {% endfor %}
-        </ul>
-
-       {# <h3>Related sources</h3>
-        <?php if($actions):?>
-        <ul>
-
-            <?php foreach ($actions as $action): ?>
-            <li>
-                <?php echo $action['start_date'];?>,
-                <?php echo $action_verbs[$action['type']];?>
-                <a href="/research-database/index.php/sources/edit/<? echo $action['source']['id'];?>"><em><?php echo $action['source']['title'];?></em></a>
-            </li>
-            <?php endforeach; ?>
-        </ul>
-        <?php endif;?>#}
-
-        <a href="/research-database/index.php/actors/edit/<? echo $actor['id'];?>">Edit actor</a> <br />
-
-
-
-        <div id="mapid"></div>
+    <div class="action_menu">
+        {% if previousSource is not null %}
+            <a href="{{ path('source_edit', {'source_id':previousSource.id}) }}" onclick="return confirmClose($('form[name="source"]'))"><img class="icon" src="{{ asset('images/previous.png') }}" title="previous" alt="previous"/></a>
+        {% endif %}
+        <a href="{{ path('volume_view', {'volume_id':source.volume.id}) }}" onclick="return confirmClose($('form[name="source"]'))"><img class="icon" src="{{ asset('images/close.gif') }}" title="close" alt="close"/></a>
+        <input type="image" class="save_button" src="{{ asset('images/save.png') }}" alt="submit" name="submit" />
+        <a href="{{ path('source_parsetranscript', {'source_id':source.id}) }}" ><img class="icon" src="{{ asset('images/parse.png') }}" title="parse" alt="parse"/></a>
+        <span>Volume: {{ source.volumePath }}</span>
+        {% if nextSource is not null %}
+            <a href="{{ path('source_edit', {'source_id':nextSource.id}) }}" onclick="return confirmClose($('form[name="source"]'))"><img class="icon" src="{{ asset('images/next.png') }}" title="next" alt="next"/></a>
+        {% endif %}
     </div>
+
+        <div id="tabs">
+        <ul>
+            <li><a href="#tabs-1">Metadata</a></li>
+            <li><a href="#tabs-2">Transcription</a></li>
+            <li><a href="#tabs-3">Research notes</a></li>
+            <li><a href="#tabs-4">Excerpt</a></li>
+            <li><a href="#tabs-5">Mentions</a></li>
+            <li><a href="#tabs-6">Actions</a></li>
+        </ul>
+
+        {# ***********  TAB 1 ********************** #}
+        <div id="tabs-1" class="form-style-10">
+             <div class="inner-wrap">
+                <div class="top_section">
+                    <p>
+                        {{ form_label(form.title) }}
+                        {{ form_errors(form.title) }}
+                        {{ form_widget(form.title) }}
+                        {{ form_help(form.title) }}
+
+                        {{ form_label(form.place_in_volume) }}
+                        {{ form_errors(form.place_in_volume) }}
+                        {{ form_widget(form.place_in_volume) }}
+                        {{ form_help(form.place_in_volume) }}
+                     </p>
+                     <p>
+                        {{ form_label(form.pages) }}
+                        {{ form_errors(form.pages) }}
+                        {{ form_widget(form.pages) }}
+                        {{ form_help(form.pages) }}
+
+                         {{ form_label(form.type) }}
+                         {{ form_errors(form.type) }}
+                         {{ form_widget(form.type) }}
+                         {{ form_help(form.type) }}
+                    </p>
+                    <p>
+                        {{ form_label(form.status) }}
+                        {{ form_errors(form.status) }}
+                        {{ form_widget(form.status) }}
+                        {{ form_help(form.status) }}
+
+                        {{ form_label(form.text_date) }}
+                        {{ form_errors(form.text_date) }}
+                        {{ form_widget(form.text_date) }}
+                        {{ form_help(form.text_date) }}
+                    </p>
+                    <p>
+                        {{ form_label(form.language) }}
+                        {{ form_errors(form.language) }}
+                        {{ form_widget(form.language) }}
+                        {{ form_help(form.language) }}
+                    </p>
+
+                  </div>
+
+                  <h3>Topics</h3>
+                 <a href="{{ path('source_edit', {'source_id':source.id, 'topicSuggestions': 1 }) }}">Suggest topics</a>
+                 {% if suggestedTopics|length > 0 %}
+                 <p>
+                     (suggested topics: {% for suggestedTopic in suggestedTopics %}{{ suggestedTopic }}{% if not loop.last %}, {% endif %}{% endfor %})
+                 </p>
+                 {% endif %}
+                  <div id="sourceTopics" data-prototype="{{ form_widget(form.sourceTopics.vars.prototype)|e('html_attr') }}">
+                    {% for sourceTopicForm in form.sourceTopics %}
+                        <span id="topic{{ sourceTopicForm.vars.value.id }}" class="source_topic">
+                            {{ sourceTopicForm.vars.value.topic }}
+                            {{ form_widget(sourceTopicForm) }}
+                            {#<a href="#" onclick="return deleteTopic({{ sourceTopicForm.vars.value.id }},$(this));">x</a>#}
+                        </span>
+                    {% endfor %}
+                </div>
+                <div id="newTopic">
+                    {{ form_widget(newTopicForm) }}
+                </div>
+             </div>
+        </div>
+
+    {# ***********  TAB 2 ********************** #}
+        <div id="tabs-2">
+            {{ form_errors(form.transcription) }}
+            {{ form_widget(form.transcription) }}
+            {{ form_help(form.transcription) }}
+        </div>
+
+        {# ***********  TAB 3 ********************** #}
+        <div id="tabs-3">
+            {{ form_errors(form.research_notes) }}
+            {{ form_widget(form.research_notes) }}
+            {{ form_help(form.research_notes) }}
+        </div>
+
+
+        {# ***********  TAB 4 ********************** #}
+        <div id="tabs-4">
+            {{ form_errors(form.excerpt) }}
+            {{ form_widget(form.excerpt) }}
+            {{ form_help(form.excerpt) }}
+        </div>
+
+        {# ***********  TAB 5 ********************** #}
+        <div id="tabs-5" class="form-style-10">
+            {{ include('mentions/newMentionsLis.html.twig') }}
+             <div class="inner-wrap">
+                <div class="section">
+                    <h3 class="mentionsHeader">Mentions {#<a href="#" onclick="addSourceMention();"><img src="<?php echo base_url();?>img/add_18.png" alt="Add mention in source" title ="Add mention in source"/> </a>#}</h3>
+                    <ul id="sourceMentions" data-prototype="{{ form_widget(form.mentions.vars.prototype)|e('html_attr') }}">
+                        {% for mentionForm in form.mentions %}
+                            {% set mention = mentionForm.vars.value %}
+                            {{ include('mentions/mentionsPreview.html.twig') }}
+                            {{ include('mentions/mentionsCheckboxes.html.twig') }}
+                            <li id="mention{{ loop.index0 }}" class="mention">
+                                {{ form_widget(mentionForm) }}
+                            </li>
+                            <a href="#" class="clone_mention_link"><img src="{{ asset('images/add_18.png') }}" alt="Clone source mention" title ="Clone source mention" onclick="cloneMention($('ul#sourceMentions'), {{ loop.index0 }})"/></a>
+                        {% endfor %}
+                    </ul>
+                </div>
+             </div>
+        </div>
+
+        {# ***********  TAB 6 ********************** #}
+        <div id="tabs-6" class="form-style-10">
+            <div class="section">
+            <h3 class="actionsHeader">Edit source actions </h3>
+            <ul id="sourceActions" data-prototype="{{ form_widget(form.actions.vars.prototype)|e('html_attr') }}">
+                {% for actionForm in form.actions %}
+                    <li class="actionForm">
+                        <span>{{ loop.index }}</span>
+                        {{ form_widget(actionForm) }}
+                        <script>
+                            $(window).on('load', correspondentAutocomplete($('#source_actions_{{ loop.index0 }}_correspondentText'), $('#source_actions_{{ loop.index0 }}_correspondent'), '{{ path('correspondent_autocomplete')}}'));
+                            $(window).on('load', placeAutocomplete($('#source_actions_{{ loop.index0 }}_placeText'), $('#source_actions_{{ loop.index0 }}_place'), '{{ path('place_autocomplete')}}'));
+                        </script>
+                    </li>
+                {% endfor %}
+            </ul>
+            </div>
+        </div>
+
+    </div>
+    <div id="tabs2">
+        <ul>
+            <li><a href="#tabs2-1">Pdf</a></li>
+            <li><a href="#tabs2-2">Transcription</a></li>
+        </ul>
+        <div id="tabs2-1">
+            <div id="source_frame">
+            {% if source.files|length > 0 %}
+                <iframe style="float:left;" src="{{  source_dir ~ asset(source.files|first.pathname ) }}">
+                </iframe>
+            </div>
+
+            <div id="source_info_box">
+                    {%  for sourceFile in source.files %}
+                        {{ sourceFile.name}} <a href="{{ path('source_remove_file', {'source_id':source.id, 'file_id':sourceFile.id}) }}" onclick="return confirmDelete('pdf');">Delete</a>
+                    {% endfor %}
+            </div>
+            {% else %}
+                <div id="no_uploaded_files">
+                    <div class="box">
+                        <div class="box__input">
+                            {{ form_row(form.file) }}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div id="tabs2-2">
+            <div class="transcription">
+                {{ source.transcription|raw }}
+            </div>
+        </div>
+    </div>
+
+    {{ form_widget(form._token) }}
+    {{ form_end(form, {'render_rest': false}) }}
 {% endblock %}
 
+{% block javascripts %}
+    {{ parent() }}
 
-
-{% block javascript %}
-    <script type="text/javascript">
-        var mymap = L.map('mapid').setView([55, 15], 4);
-        L.tileLayer('https://api.mapbox.com/styles/v1/jacoborrje/cjqm9usf748a12snpnsjkjqpq/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiamFjb2JvcnJqZSIsImEiOiJjanFtOWtwbmg2a2YwNDNwcGg2cG1sZzN1In0.c11tDOxEs5T5YHgbO0TAKg', {
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-            maxZoom: 18,
-            id: 'mapbox.streets',
-            accessToken: 'pk.eyJ1IjoiamFjb2JvcnJqZSIsImEiOiJjanFtOWtwbmg2a2YwNDNwcGg2cG1sZzN1In0.c11tDOxEs5T5YHgbO0TAKg'
-        }).addTo(mymap);
-
-        var birthplace_icon = L.icon({
-            iconUrl: '<?php echo base_url();?>maps/born.png',
-
-            iconSize:     [18, 18], // size of the icon
-            iconAnchor:   [9, 9], // point of the icon which will correspond to marker's location
-            popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
+    {# Editing scripts#}
+    <script src="{{ asset('js/jquery-ui-1.12.1/jquery-ui.js') }}"></script>
+    <script src="{{ asset('js/editFunctions.js') }}"></script>
+    <script src="{{ asset('js/tinymce/tinymce.min.js') }}"></script>
+    <script>
+        tinymce.init({
+            selector: 'textarea.tinymce',  // change this value according to your HTML
+            toolbar: 'undo redo | styleselect | bold italic | link image'
         });
-
-        var placeofdeath_icon = L.icon({
-            iconUrl: '<?php echo base_url();?>maps/death.png',
-
-            iconSize:     [18, 18], // size of the icon
-            iconAnchor:   [9, 9], // point of the icon which will correspond to marker's location
-            popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
-        });
-
-        var marker_birthplace;
-        <?php echo "marker_birthplace = L.marker([".$actor['birth_place']['lat'].", ".$actor['birth_place']['lng']."],{icon: birthplace_icon}).addTo(mymap);";?>
-        <?php echo 'marker_birthplace.bindPopup("<b>Born in '.$actor['birth_place']['name'].' in '.$actor['birthdate'].'</b>");';?>
-
-        <?php echo "marker_placeofdeath = L.marker([".$actor['place_of_death']['lat'].", ".$actor['place_of_death']['lng']."],{icon: placeofdeath_icon}).addTo(mymap);";?>
-        <?php echo 'marker_placeofdeath.bindPopup("<b>Died in '.$actor['place_of_death']['name'].' in '.$actor['date_of_death'].'</b>");';?>
-
-
     </script>
+    {# ---------------------------------------- #}
+{% endblock %}
+
+{% block customJavascripts %}
+    {{ parent() }}
+
+    {{ include('source/edit.js.twig') }}
 {% endblock %}

@@ -2,7 +2,14 @@
     {% import _self as list %}
     <ul>
         {% for place in places %}
-            <li>{{ place.name }}</li>
+            <li>
+                <a href="{{ path('place_view', {'place_id':place.id}) }}"
+                onmouseover="$('#place_marker_{{ place.id }}').addClass('selected')"
+                onmouseleave="$('#place_marker_{{ place.id }}').removeClass('selected');">
+                    {{ place.name }}
+                </a>
+                <a href="{{ path('place_delete', {'place_id':place.id}) }}" onclick="return confirmDelete('place');"><img src="{{ asset('images/delete.png') }}" title="delete" alt="delete"></a>
+            </li>
             {% if place.children|length > 0 %}
                 {{ list.placeHierary(place.children) }}
             {% endif %}

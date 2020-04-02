@@ -32,7 +32,7 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormEvent;
 
 
-class SourceTopicType extends \Symfony\Component\Form\AbstractType
+class NewSourceTopicType extends \Symfony\Component\Form\AbstractType
 {
 
     public function __construct(TopicAutocompleteTransformer $transformer)
@@ -44,30 +44,14 @@ class SourceTopicType extends \Symfony\Component\Form\AbstractType
     {
         $builder
             ->add('id', HiddenType::class)
-            ->add('topic', HiddenType::class, array(
-                'label' => false))
-            ->add('add_topic', SubmitType::class, array(
-                'label' => 'add',)
-            )
-            ->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
-                $topic = $event->getData();
-                $form = $event->getForm();
-                if (!$topic || null === $topic->getId()) {
-                    $form->add('topic', NewSourceTopicTopicType::class, array(
+
+            ->add('topic', NewSourceTopicTopicType::class, array(
                         'label' => false,
                         'attr' => array('class'=> "newSourceTopicInput")
-                    ));
-                    $form->add('topicId', HiddenType::class, array(
+            ))
+            ->add('topicId', HiddenType::class, array(
                         'mapped' => false
-                    ));
-                }
-                else{
-                    $form->add('topic', SourceTopicTopicType::class, array(
-                        'label' => false
-                    ));
-
-            }
-    });
+            ));
     }
 
     public function configureOptions(OptionsResolver $resolver)

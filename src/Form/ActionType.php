@@ -9,7 +9,13 @@
 
 namespace App\Form;
 
-use App\Entity\Source;
+use App\Entity\Action;
+use App\Entity\Correspondent;
+use App\Entity\Place;
+use App\Form\Type\CorrespondentAutocompleteType;
+use App\Form\Type\PlaceAutocompleteType;
+use App\Repository\CorrespondentRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -21,41 +27,38 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 
-class SourceType extends \Symfony\Component\Form\AbstractType
+class ActionType extends \Symfony\Component\Form\AbstractType
 {
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
             ->add('id', HiddenType::class)
-            ->add('title', TextType::class, array('label' => 'Title'))
-            ->add('place_in_volume', TextType::class, array('label' => 'Place in volume'))
-            ->add('pages', TextType::class)
-            ->add('status', ChoiceType::class, array( "choices" => array(
-                "not ordered" => 0,
-                "ordered" => 1,
-                "unfinished" => 2,
-                "surveyed" => 3,
-                "scanned" => 4,
-                "completed" => 5
-            ))
-            )
-            ->add('date', TextType::class, array('label' => 'Creation date'))
-            ->add ('transcription', TextareaType::class, array(
-                'attr' => array('class' => 'tinymce', 'style' => 'height:602px;')))
-            ->add ('research_notes', TextareaType::class, array(
-                'attr' => array('class' => 'tinymce', 'style' => 'height:602px;')))
-            ->add ('excerpt', TextareaType::class, array(
-                'attr' => array('class' => 'tinymce', 'style' => 'height:602px;')))
-            ->add('submit', SubmitType::class, array('label' => 'Create source'))
-        ;
+            ->add('text_start_date', TextType::class, array('label' => 'Start date'))
+            ->add('text_end_date', TextType::class, array('label' => 'End date'))
+            ->add('description', TextType::class, array('label' => 'Description'))
+
+            ->add('type', ChoiceType::class, array( "choices" => array(
+                "none" => 0,
+                "author" => 1,
+                "recipient" => 2,
+                "signer" => 3,
+                "deliverer" => 4,
+                "answerer" => 5
+            )))
+            ->add('correspondentText', TextType::class)
+            ->add('correspondent', CorrespondentAutocompleteType::class)
+            ->add('place', PlaceAutocompleteType::class, array(
+            ), array('label' => 'Place where it happened'))
+            ->add('placeText', TextType::class)
+            ->add('description', TextType::class)
+         ;
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => Source::class,
+            'data_class' => Action::class,
         ));
     }
-
 }

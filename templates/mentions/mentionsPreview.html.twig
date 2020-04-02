@@ -1,10 +1,6 @@
-{% block mentionsCheckboxes %}
-    <li class="mentionCheckBoxes">
-        <p>
-            <label>Actor</label><input type="checkbox" name="actor"  {% if mentionForm.vars.value.actor is not null %} checked {% endif %} value="actorCheck" id="actorCheck">
-            <label>Institution</label><input type="checkbox" name="institution"  {% if mentionForm.vars.value.institution is not null %} checked {% endif %} value="institutionCheck" id="institutionCheck">
-            <label>Place</label><input type="checkbox" name="place" {% if mentionForm.vars.value.place is not null %} checked {% endif %} value="placeCheck" id="placeCheck">
-            <label>Source</label><input type="checkbox" name="source" {% if mentionForm.vars.value.mentionedSource is not null %} checked {% endif %} value="sourceCheck" id="sourceCheck">
-        </p>
+{% block mentionsPreview %}
+    <li id="mention{{ loop.index0 }}_preview" class="mention_preview">
+        {{ mention.previewText }}
+        <a href="#" onclick="toggleVisible($('#mention{{ loop.index0 }}'), $('.mention'));toggleVisible($('#mentionCheckBoxes{{ loop.index0 }}'), $('.mentionCheckBoxes')); actorAutocomplete($('#source_mentions_{{ loop.index0 }}_actorText'), $('#source_mentions_{{ loop.index0 }}_actor'),'{{ path('actor_autocomplete') }}'); placeAutocomplete($('#source_mentions_{{ loop.index0 }}_eventPlaceText'), $('#source_mentions_{{ loop.index0 }}_eventPlace'),'{{ path('place_autocomplete') }}');institutionAutocomplete($('#source_mentions_{{ loop.index0 }}_institutionText'), $('#source_mentions_{{ loop.index0 }}_institution'),'{{ path('institution_autocomplete') }}');">[edit]</a>
     </li>
 {% endblock %}

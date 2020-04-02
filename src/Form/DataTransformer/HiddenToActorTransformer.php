@@ -8,25 +8,26 @@
 namespace App\Form\DataTransformer;
 
 use Symfony\Component\Form\DataTransformerInterface;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
-use App\Entity\Topic;
+use App\Entity\Actor;
 
-class HiddenToTopicTransformer implements DataTransformerInterface
+class HiddenToActorTransformer implements DataTransformerInterface
 {
     private $entityManager;
 
-    public function __construct(ObjectManager $entityManager)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
     }
 
-    public function transform($topic)
+    public function transform($actor)
     {
-        if (null === $topic) {
+        if (null === $actor) {
             return '';
         }
-        return $topic->getId();
+        echo $actor->getId()."<br>";
+        return $actor->getId();
     }
 
     public function reverseTransform($id)
@@ -35,15 +36,15 @@ class HiddenToTopicTransformer implements DataTransformerInterface
             return null;
         }
 
-        $topic = $this->entityManager
-            ->getRepository(Topic::class)->findOneBy(array('id' => $id));
+        $actor = $this->entityManager
+            ->getRepository(Actor::class)->findOneBy(array('id' => $id));
 
-        if (null === $topic) {
-            throw new TransformationFailedException(sprintf('Topic with id "%s" does not exist',
+        if (null === $actor) {
+            throw new TransformationFailedException(sprintf('Actor with id "%s" does not exist',
                 $id
             ));
         }
 
-        return $topic;
+        return $actor;
     }
 }

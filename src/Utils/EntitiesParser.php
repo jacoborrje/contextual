@@ -3,249 +3,216 @@ namespace App\Utils;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Entity;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use App\Entity\Source;
 use App\Entity\Place;
-use App\Entity\DatabaseFile;
-use \DateTime;
-use Imagick;
-use Spatie\PdfToText\Pdf;
+use App\Entity\Actor;
+use Psr\Log\LoggerInterface;
+use App\Utils\ActorService;
 
-class FileUploader
+
+class EntitiesParser
 {
-    private $sourcesDir, $placeimageDir, $publicDir, $tempFolder;
-    private $imageService, $entityManager;
+    private $entityManager;
     private $text;
+    private $source;
+    private $logger;
+    private $addedMarkers;
+    private $actorService;
 
-
-    function __construct($publicDir, $sourcesDir, $placeimageDir, ImageService $imageService, EntityManagerInterface $entityManager)
+    function __construct(EntityManagerInterface $entityManager, LoggerInterface $logger, ActorService $actorService)
     {
-        $this->publicDir = $publicDir;
-        $this->sourcesDir = $sourcesDir;
-        $this->placeimageDir = $placeimageDir;
-        $this->imageService = $imageService;
-        $this->tempFolder = $this->publicDir . '/sources/temp/';
         $this->entityManager = $entityManager;
-
+        $this->logger = $logger;
+        $this->actorService = $actorService;
     }
 
-    public function upload(UploadedFile $file, $type, $object)
+    public function initialize(Source $source)
     {
-        if($type === 'pdf'){
-            if($file->getMimeType()==='application/pdf'){
-                $filename = $this->generatePdfFilename($object);
-                try {
-                    $file->move($this->publicDir. $this->sourcesDir.$this->generatePdfPath($object), $filename);
-                } catch (FileException $e) {
-                    echo $e->getMessage();
+        $this->text = html_entity_decode($source->getTranscription());
+        $this->source = $source;
+        $this->addedMarkers = [];
+    }
+
+    public function parsePlaces(){
+        $repository = $this->entityManager->getRepository(Place::class);
+        $allPlaces = $repository->findAll();
+        $foundPlaces = [];
+
+        foreach($allPlaces as $place){
+            $foundTokens = $this->findToken($place, $this->text, $place->getName());
+            if($foundTokens) {
+                $foundPlaces = array_merge($foundPlaces, $foundTokens);
+            }
+            if($place->hasAltNames()){
+                $altNames = $place->getAltNamesArray();
+                foreach($altNames as $altName){
+                    $foundTokens = $this->findToken($place, $this->text, $altName);
+                    if($foundTokens) {
+                        $foundPlaces = array_merge($foundPlaces, $foundTokens);
+                    }
                 }
             }
         }
-        else if ($type === 'image'){
-            if($file->getMimeType() ==='jpeg' || $file->getMimeType() === 'png'){
-                try {
-                    $pathname = $this->publicDir . $this->placeimageDir . $filename;
+        return $foundPlaces;
+    }
 
-                } catch (FileException $e) {
-                    echo $e->getMessage();
-                }
+    public function findToken($object, $text, $searchString, $offset = 0){
+        $matchString = "([\s\.,\r\n<>]".preg_quote($searchString)."[\s\.,\r\n<>s’'';])";
+        preg_match ($matchString, $text,$matches, PREG_OFFSET_CAPTURE, $offset);
+        if(count($matches)) {
+            $foundToken = [$object, $matches[0][1],$matches[0][1]+strlen($searchString)+2];
+            $this->logger->debug("The entities parser found a token: ". $object. " at position [".$foundToken[1]." to ".$foundToken[2]."] with name ".$searchString);
+            $nextTokens = $this->findToken($object, $text, $searchString, $foundToken[2]);
+            if($nextTokens) {
+                $nextTokens[] = $foundToken;
+                return $nextTokens;
             }
+            else
+                return [$foundToken];
         }
         else{
             return false;
         }
-
-        return $filename;
     }
 
-    public function generatePdfFilename(Source $source){
-        $filename = $source->getAuthorsAsString(1, true);
-        $filename = $filename . "_(" . $source->getTextDate().").pdf";
-        return $filename;
-    }
-
-    public function generatePdfPath(Source $source){
-        $path = $source->getSourcePath();
-        return $path;
-    }
-
-    public function generatePlaceimageFilename(Place $place){
-        $filename = $place->getName();
-        $filename = preg_replace("([åäö])", "a", $filename);
-        return $filename;
-    }
-
-    public function generatePlaceimageThumbnailFilename(Place $place){
-        $filename = urlencode($place->getName());
-        $filename .= "_thumb";
-        return $filename;
-    }
-
-    public function uploadPlaceImage(Place $place){
-        $uploadedFile = $place->getImage()->getFileContents();
-        if(!is_null($uploadedFile)){
-            $type = explode("/",$uploadedFile->getMimeType())[1];
-            if($type === 'jpeg'||$type === 'png'){
-                $imageFile = $place->getImage();
-                if($type ==='jpeg') $extension = ".jpg";
-                else if ($type ==='png') $extension = ".png";
-                $filename = $this->generatePlaceimageFilename($place).$extension;
-                $path = $this->publicDir . $this->placeimageDir;
-                $pathname = $path . $filename;
-                $imageFile->setName($filename);
-                $imageFile->setType($type);
-                $currentTime = new DateTime();
-                $currentTime->format('Y-m-d H:i:s');
-                $imageFile->setUpdatedAt($currentTime);
-                $uploadedFile->move($path, $filename);
-                $this->imageService->resizeImage($pathname, 275, 300);
-                $uploadedFile = new UploadedFile($pathname,$filename);
-                $imageFile->setSize($uploadedFile->getSize());
-                $thumbPathname = $path . $this->generatePlaceimageThumbnailFilename($place).$extension;
-                $this->imageService->createThumbnail($pathname, $thumbPathname, 150, 200);
-
-                $place->setImage($imageFile);
-                return $place;
+    public function markTokens($tokens){
+        $taggedText = $this->text;
+        foreach ($tokens as $token){
+            $previousTags = 0;
+            foreach($tokens as $otherToken){
+                if($otherToken['startPos']<$token['startPos'])
+                    $previousTags++;
             }
-            else{
-                throw new \Exception('It is only possible to upload jpeg and png images!');
+
+            $startPos =  $this->getNewOffset($token['startPos']) + 1;
+            $endPos = $this->getNewOffset($token['endPos']) + 2;
+            $taggedText = substr_replace($taggedText, '<b>', $startPos, 0);
+            $taggedText = substr_replace($taggedText, '</b>', $endPos, 0);
+            $this->addedMarkers[] = [7,$token['endPos']];
+            $this->logger->debug("Marking token ".$token['entity'].". Shifting position from ". $token['startPos']." to ".$startPos.".");
+        }
+        return $taggedText;
+    }
+
+    public function getNewOffset($oldPos){
+        $offset = 0;
+        foreach($this->addedMarkers as $addedMarker){
+            if($addedMarker[1]<$oldPos){
+                $offset += $addedMarker[0];
             }
         }
-        else{
-            throw new \Exception('No file was uploaded');
-        }
+        return $oldPos + $offset;
     }
 
-    public function uploadSourcePdf(Source $source){
-        $uploadedFile = $source->getFile()->getFileContents();
-        if(!is_null($uploadedFile)){
-            if(gettype($uploadedFile) === 'array'){
-                if ( count($uploadedFile)===0) {
-                    $source->setFiles(null);
-                    return $source;
-                }
-                else if (count($uploadedFile)===1){
-                    $type = explode("/",$uploadedFile[0]->getMimeType())[1];
-                    if($type === 'pdf'){
-                        $extension = '.pdf';
-                        $uploadedFile = $uploadedFile[0];
+    public function parseActors(){
+        $repository = $this->entityManager->getRepository(Actor::class);
+        $allActors = $repository->findAll();
+        $foundActors = [];
+
+        foreach($allActors as $actor){
+            $search_name = $actor->getFirstName()." ". $actor->getSurname();
+
+            $foundTokens = $this->findToken($actor, $this->text, $search_name);
+            if($foundTokens) {
+                $foundActors = array_merge($foundActors, $foundTokens);
+            }
+
+            if($actor->hasAltFirstNames()){
+                $altFirstNames = $actor->getAltFirstNamesArray();
+                foreach($altFirstNames as $altFirstName){
+                    $search_name = $altFirstName." ". $actor->getSurname();
+                    $foundTokens = $this->findToken($actor, $this->text, $search_name);
+                    if($foundTokens) {
+                        $foundActors = array_merge($foundActors, $foundTokens);
                     }
-                    else if ($type === 'jpeg'){
-                        $image = $uploadedFile[0]->getPathname();
-                        $pdf = new Imagick($image);
-                        $filename = $this->tempFolder.'combined.pdf';
-                        $pdf->writeImages($filename, true);
-                        $uploadedFile = new UploadedFile($filename, "combined.pdf", null, null,  true);
-                    }
-                    else{
-                        throw new \Exception('The file must be a pdf!');
-                    }
-                }
-                else if (count($uploadedFile)>1){
-                    $images = [];
-                    foreach($uploadedFile as $file) {
-                        $type = explode("/",$file->getMimeType())[1];
-                        if($type === 'jpeg') {
-                            $images[] = $file->getPathname();
+                    if ($actor->hasAltSurnames()){
+                        $altSurnames = $actor->getAltSurnamesArray();
+                        foreach($altSurnames as $altSurname){
+                            $search_name = $altFirstName." ". $altSurname;
+                            $foundTokens = $this->findToken($actor, $this->text, $search_name);
+                            if($foundTokens) {
+                                $foundActors = array_merge($foundActors, $foundTokens);
+                            }
                         }
                     }
-                    $extension = '.pdf';
-                    $pdf = new Imagick($images);
-                    $pdf->setImageFormat('pdf');
-                    $filename = $this->tempFolder.'combined.pdf';
-                    $pdf->writeImages($filename, true);
-                    $uploadedFile = new UploadedFile($filename, "combined.pdf", null, null,  true);
-                }
-                else{
-                    throw new \Exception('Unknown error!');
                 }
             }
-            else {
-                $type = explode("/", $uploadedFile->getMimeType())[1];
-                if ($type === 'pdf') {
-                    $extension = ".pdf";
-                } else {
-                    throw new \Exception('The file must be a pdf!');
+            if ($actor->hasAltSurnames()){
+                $altSurnames = $actor->getAltSurnamesArray();
+                foreach($altSurnames as $altSurname){
+                    $search_name = $actor->getFirstName()." ". $altSurname;
+                    $foundTokens = $this->findToken($actor, $this->text, $search_name);
+                    if($foundTokens) {
+                        $foundActors = array_merge($foundActors, $foundTokens);
+                    }
+                    if ($actor->hasAltFirstNames()){
+                        $altFirstNames = $actor->getAltFirstNamesArray();
+                        foreach($altFirstNames as $altFirstName){
+                            $search_name = $altFirstName." ". $altSurname;
+                            $foundTokens = $this->findToken($actor, $this->text, $search_name);
+                            if($foundTokens) {
+                                $foundActors = array_merge($foundActors, $foundTokens);
+                            }
+                        }
+                    }
                 }
             }
-            $pdfFile = $source->getFile();
-            $filename = $this->generatePdfFilename($source);
-            $path = $this->publicDir . $this->sourcesDir . $this->generatePdfPath($source);
-            $pathname = $path . $filename;
-            $pdfFile->setPath($this->generatePdfPath($source));
-            $pdfFile->setName($filename);
-            $pdfFile->setType('pdf');
-            $pdfFile->setSize($uploadedFile->getSize());
-            $currentTime = new DateTime();
-            $currentTime->format('Y-m-d H:i:s');
-            $pdfFile->setUpdatedAt($currentTime);
-            $uploadedFile->move($path, $filename);
+            $initial = substr($actor->getFirstName(),0,1);
+            $search_name = $initial.". ". $actor->getSurname();
 
-            //if(strlen($source->getTranscription())===0||is_null($source->getTranscription())){
-                $text = (new Pdf('/usr/local/bin/pdftotext'))
-                    ->setPdf($pathname)
-                    ->setOptions(['layout'])
-                    ->text();
-                $source->setTranscription($text);
-           // }
+            $foundTokens = $this->findToken($actor, $this->text, $search_name);
+            if($foundTokens) {
+                $foundActors = array_merge($foundActors, $foundTokens);
+            }
+            $search_name = $initial.": ". $actor->getSurname();
+            $foundTokens = $this->findToken($actor, $this->text, $search_name);
+            if($foundTokens) {
+                $foundActors = array_merge($foundActors, $foundTokens);
+            }
+            $search_name = $initial." ". $actor->getSurname();
+            $foundTokens = $this->findToken($actor, $this->text, $search_name);
+            if($foundTokens) {
+                $foundActors = array_merge($foundActors, $foundTokens);
+            }
+            if($this->actorService->hasUniqueSurname($actor)){
+                $titles = ["Mr. ", "M[iste]r ", "M:r ",
+                           "Herr. ", "Herr. ", "H. ", "H[err] ", "H:r ", "H.r ",
+                           "D[octo]r ", "Dr ", "Dr. ", "Herr Doktor ", "Doktor ", "Doctor ",
+                           "Archiater ", "Baron ", "H[err] Baron ",
+                            "Envoyen ", "Envoye ",
+                           "Greve ", "H[err] Vice Praesid[ent] ", "gref ",
+                           "President ", "Secreterare ", "H[err] President",
+                           "H[err] Secreterare ", "H[err] Vice Praesid[ent] B[aron] ",
+                           "H[err] Mag[ister] ", "Mag. ", "H:r Magist: ", "Magister ",
+                           "Capt. ", "Captain ", "Kapten ", "Capten ",
+                           "Biskopen "];
 
-            $source->setFile($pdfFile);
-            return $source;
+                foreach($titles as $title){
+                    $search_name = $title.$actor->getSurname();
+                    $foundTokens = $this->findToken($actor, $this->text, $search_name);
+                    if($foundTokens) {
+                        $foundActors = array_merge($foundActors, $foundTokens);
+                    }
+
+                    if ($actor->hasAltSurnames()) {
+                        $altSurnames = $actor->getAltSurnamesArray();
+                        foreach ($altSurnames as $altSurname) {
+                            $search_name = $title . $altSurname;
+                            $foundTokens = $this->findToken($actor, $this->text, $search_name);
+                            if ($foundTokens) {
+                                $foundActors = array_merge($foundActors, $foundTokens);
+                            }
+                        }
+                    }
+                }
+            }
         }
-        else{
-            throw new \Exception('No file was uploaded');
-        }
-    }
 
-    public function removePlaceImage(Place $place, DatabaseFile $image){
-        $extension = $this->getExtension($image);
-        if(file_exists($this->publicDir. $this->placeimageDir.$image->getName()))
-            unlink($this->publicDir . $this->placeimageDir.$image->getName());
-        echo $this->publicDir . $this->placeimageDir.$this->generatePlaceimageThumbnailFilename($place).$extension;
-        if(file_exists($this->publicDir . $this->placeimageDir.$this->generatePlaceimageThumbnailFilename($place).$extension))
-            unlink($this->publicDir . $this->placeimageDir.$this->generatePlaceimageThumbnailFilename($place).$extension);
-        $place->setImage(null);
-
-        $this->entityManager->persist($place);
-        $this->entityManager->flush();
-        $this->entityManager->remove($image);
-        $this->entityManager->flush();
-        return $place;
-    }
-
-    public function removePdf(Source $source, DatabaseFile $pdf){
-        if(file_exists($this->publicDir.$this->sourcesDir.$pdf->getPathname()))
-            unlink($this->publicDir.$this->sourcesDir.$pdf->getPathname());
-
-        $files_in_directory = scandir($this->publicDir.$this->sourcesDir.$pdf->getPath());
-        if(count($files_in_directory) <= 2){
-            rmdir($this->publicDir.$this->sourcesDir.$pdf->getPath());
-        }
-        $source->setFile(null);
-
-
-
-        $this->entityManager->persist($source);
-        $this->entityManager->flush();
-        $this->entityManager->remove($pdf);
-        $this->entityManager->flush();
-        return $source;
-    }
-
-    public function getExtension($image){
-        $type = $image->getType();
-
-        if($type === 'jpeg')
-            return ".jpg";
-        else if ($type === 'png')
-            return ".png";
-        else if ($type === 'pdf')
-            return ".pdf";
+        if(count($foundActors))
+            return $foundActors;
         else
-            return null;
+            return false;
     }
-
 }
 
 ?>

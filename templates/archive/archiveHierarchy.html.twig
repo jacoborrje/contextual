@@ -1,0 +1,20 @@
+{% macro archiveHierary(archives) %}
+    {% import _self as list %}
+    <ul>
+        {% for archive in archives %}
+            <li><a href="{{ path('archive_view', {'archive_id':archive.id}) }}">{{ archive.name }}</a>
+                <a href="{{ path('archive_delete', {'archive_id':archive.id}) }}" onclick="return confirmDelete('archive');"><img src="{{ asset('images/delete.png') }}" title="delete" alt="delete"></a>
+                <a href="{{ path('archive_edit', {'archive_id':archive.id}) }}"><img src="{{ asset('images/edit.png') }}" title="edit" alt="edit"></a>
+            </li>
+            {% if archive.children|length > 0 %}
+                {{ list.archiveHierary(archive.children) }}
+            {% endif %}
+        {% endfor %}
+    </ul>
+{% endmacro %}
+
+
+
+
+{% import _self as archiveHierarchy %}
+

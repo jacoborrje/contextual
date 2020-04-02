@@ -1,6 +1,4 @@
-/**
- * Created by jacoborrje on 2019-05-10.
- */
+<script>
 
 $( function() {
     $( "#tabs" ).tabs();
@@ -96,6 +94,10 @@ jQuery(document).ready(function() {
         if($placeCheck.is(':checked')){
             $placeCheck.parent().parent().next().find('.editPlaceMentionDropdown').attr('style','table-row')
         }
+        var $eventPlaceCheck = $(this).find('input.eventPlaceCheck');
+        if($eventPlaceCheck.is(':checked')){
+            $eventPlaceCheck.parent().parent().next().find('.editEventPlaceMentionDropdown').attr('style','table-row')
+        }
         var $sourceCheck = $(this).find('input.sourceCheck');
         if($sourceCheck.is(':checked')){
             $sourceCheck.parent().parent().next().find('.editSourceMentionDropdown').attr('style','table-row')
@@ -107,6 +109,7 @@ jQuery(document).ready(function() {
     $addMentionButton.on('click', function(e) {
         // add a new tag form (see next code block)
         addMentionForm($mentionsHolder);
+
     });
 
 
@@ -131,6 +134,12 @@ function addActionForm($collectionHolder) {
     $collectionHolder.append($newFormLi);
     // add a delete link to the new form
     addActionFormDeleteLink($newFormLi);
+
+    correspondentAutocomplete($('#source_actions_'+index+'_correspondentText'), $('#source_actions_'+index+'_correspondent'), 'http://127.0.0.1:8000/autocomplete/correspondent');
+    placeAutocomplete($('#source_actions_'+index+'_placeText'), $('#source_actions_'+index+'_place'), 'http://127.0.0.1:8000/autocomplete/place');
+
+    correspondentAutocomplete($('#source_mentions_'+index+'_actorText'), $('#source_mentions_'+index+'_actor'),'{{ path('actor_autocomplete') }}');
+    placeAutocomplete($('#source_mentions_'+index+'_eventPlaceText'), $('#source_mentions_'+index+'_eventPlace'),'{{ path('place_autocomplete') }}');
 }
 
 function addActionFormDeleteLink($tagFormLi) {
@@ -218,8 +227,59 @@ function addMentionForm($mentionHolder) {
     $mentionHolder.append($newMentionFormLi);
     addMentionFormDeleteLink($newMentionPreviewLi, index);
 
+    actorAutocomplete($('#source_mentions_'+index+'_actorText'), $('#source_mentions_'+index+'_actor'),'/autocomplete/actor');
+    placeAutocomplete($('#source_mentions_'+index+'_eventPlaceText'), $('#source_mentions_'+index+'_eventPlace'),'/autocomplete/place');
+    institutionAutocomplete($('#source_mentions_'+index+'_institutionText'), $('#source_mentions_'+index+'_institution'),'/autocomplete/institution');
 
     // add a delete link to the new form
+}
+
+function cloneMention($mentionHolder, originalIndex){
+    // Get the data-prototype explained earlier
+    var prototype = $mentionHolder.data('prototype');
+
+    // get the new index
+    var index = $mentionHolder.data('index');
+
+    var newForm = prototype;
+    newForm = newForm.replace(/__name__/g, index);
+
+    // increase the index with one for the next item
+    $mentionHolder.data('index', index + 1);
+
+    // Display the form in the page in an li, before the "Add a tag" link li
+    var $newMentionPreviewLi = $('#mention'+originalIndex+'_preview').clone();
+    $newMentionPreviewLi.attr("id", $newMentionPreviewLi.attr("id").replace(originalIndex+"_", index+"_"));
+    $newMentionPreviewLi.html($newMentionPreviewLi.html().replace(originalIndex, index));
+    $newMentionPreviewLi.removeClass("hidden");
+    $newMentionPreviewLi.addClass("mention_preview");
+
+
+    var $newMentionCheckboxesLi = $('#mentionCheckBoxes'+originalIndex).clone();
+    $newMentionCheckboxesLi.attr("id", $newMentionCheckboxesLi.attr("id").replace(originalIndex, index));
+    $newMentionCheckboxesLi.html($newMentionCheckboxesLi.html().replace(originalIndex, index));
+    $newMentionCheckboxesLi.removeClass("hidden");
+    $newMentionCheckboxesLi.addClass("mentionCheckboxes");
+
+    var $newMentionFormLi = $('<li id="mention'+index+'" class="newMention"></li>').append(newForm);
+
+    $mentionHolder.append($newMentionPreviewLi);
+    $mentionHolder.append($newMentionCheckboxesLi);
+    $mentionHolder.append($newMentionFormLi);
+
+    // add cloned data
+    $('#source_mentions_'+index+'_verb').val($('#source_mentions_'+originalIndex+'_verb').val());
+    $('#source_mentions_'+index+'_text_date').val($('#source_mentions_'+originalIndex+'_text_date').val());
+    $('#source_mentions_'+index+'_time').val($('#source_mentions_'+originalIndex+'_time').val());
+    $('#source_mentions_'+index+'_description').val($('#source_mentions_'+originalIndex+'_description').val());
+    $('#source_mentions_'+index+'_startPage').val($('#source_mentions_'+originalIndex+'_startPage').val());
+    $('#source_mentions_'+index+'_endPage').val($('#source_mentions_'+originalIndex+'_endPage').val());
+    $('#source_mentions_'+index+'_actor').val($('#source_mentions_'+originalIndex+'_actor').val());
+    $('#source_mentions_'+index+'_actorText').val($('#source_mentions_'+originalIndex+'_actorText').val());
+    $('#source_mentions_'+index+'_place').val($('#source_mentions_'+originalIndex+'_place').val());
+    $('#source_mentions_'+index+'_placeText').val($('#source_mentions_'+originalIndex+'_placeText').val());
+    $('#source_mentions_'+index+'_eventPlace').val($('#source_mentions_'+originalIndex+'_eventPlace').val());
+    $('#source_mentions_'+index+'_eventPlaceText').val($('#source_mentions_'+originalIndex+'_eventPlaceText').val());
 }
 
 function addMentionFormDeleteLink($previewli) {
@@ -294,3 +354,4 @@ if (isAdvancedUpload) {
                 .submit();  // autosubmit as well
         });
 }
+</script>

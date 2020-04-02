@@ -1,21 +1,56 @@
 {% extends 'base.html.twig' %}
-{% block title %}Research database -> topics -> {{ topic.topic }} {% endblock %}
+{% block title %}Research database -> institutions -> {{ institution.name }} {% endblock %}
 
 {% block body %}
 
     <div id="index_area">
-        <h1>{{ topic.topic }}</h1>
-        {% if(topic.sources|length>0) %}
-        <h3>Sources with this topic:</h3>
-        <ul>
-        {% for sourceTopic in topic.sources %}
-            <li> <a href="{{ path('source_edit', {'source_id':sourceTopic.source.id}) }}">{{ sourceTopic.source.title }}</a></li>
-        {% endfor %}
-        </ul>
-        {% else %}
-            <h3>There are no sources with this topic yet.</h3>
+        <h1>{{ institution.name }} <span class="editLink"><a href="{{ path('institution_edit', {'institution_id':institution.id}) }}">[edit]</a></span></h1>
+
+        {% if institution.archive is not null %}
+            <h3>Institution archive: <a href="{{ path('archive_view', {'archive_id':institution.archive.id}) }}">{{ institution.archive.name }}</a></h3>
+            {% if institution.archive.children|length > 0 %}
+                {% import "archive/archiveHierarchy.html.twig" as list %}
+                {{ list.archiveHierary(institution.archive.children) }}
+            {% endif %}
+            {% if institution.archive.series|length > 0 %}
+                {% import "series/seriesHierarchy.html.twig" as seriesList %}
+                {{ seriesList.seriesHierarchy(institution.archive.series) }}
+            {% endif %}
+            {% else %}
+
         {% endif %}
+
+        {% if timeline.entries|length > 0 %}
+        <div id="timeline">
+            <h2>Timeline</h2>
+            <ul>
+                {% for entry in timeline.entries %}
+                    <li>
+                        <span class="entryDate">{{ entry.textDate }}</span> {{ entry.entryString|raw}}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        {% endif %}
+
+        {% if institution.researchNotes is not empty %}
+        <h3>Research notes</h3>
+        <p>
+            {{ institution.researchNotes|raw }}
+        </p>
+
+        {% endif %}
+
+        {% if institution.description is not empty %}
+            <h3>Description</h3>
+            <p>
+                {{ institution.description|raw }}
+            </p>
+
+        {% endif %}
+
+
     </div>
 
 {% endblock %}
-

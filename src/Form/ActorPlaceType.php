@@ -9,9 +9,10 @@
 
 namespace App\Form;
 
-use App\Entity\ActorOccupation;
-use App\Entity\Occupation;
+use App\Entity\ActorPlace;
+use App\Entity\Place;
 use App\Entity\Institution;
+use App\Form\Type\PlaceAutocompleteType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\AbstractType;
@@ -24,30 +25,34 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 
-class ActorOccupationType extends \Symfony\Component\Form\AbstractType
+class ActorPlaceType extends \Symfony\Component\Form\AbstractType
 {
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('occupation', EntityType::class, array(
-                'class' => Occupation::class,
-                'placeholder' => 'None',
+            ->add('place', PlaceAutocompleteType::class, array(
                 'empty_data' => null
             ))
-            ->add('institution', EntityType::class, array(
-                'class' => Institution::class,
-                'placeholder' => 'None',
-                'empty_data' => null
+            ->add('place_text', TextType::class, array('label' => 'Place'))
+            ->add('type', ChoiceType::class, array(
+                'choices' => array(
+                        'birthplace' => 0,
+                        'place of death' => 1,
+                        'place of residence' => 2,
+                        'place of work' => 3,
+                        'country residence' => 4,
+                        'visited' => 5,
+                )
             ))
-            ->add('text_start_date', TextType::class, array('label' => 'Start date'))
-            ->add('text_end_date', TextType::class, array('label' => 'End date'));
+            ->add('text_date_of_arrival', TextType::class, array('label' => 'Start date'))
+            ->add('text_date_of_leaving', TextType::class, array('label' => 'End date'));
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => ActorOccupation::class,
+            'data_class' => ActorPlace::class,
         ));
     }
 }

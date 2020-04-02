@@ -1,13 +1,51 @@
 {% extends 'base.html.twig' %}
-{% block title %}Research database -> edit occupation{% endblock %}
+{% block title %}Research database -> edit institution{% endblock %}
 {% block body %}
+    {% form_theme form.new_place 'form/newInstitutionPlaceForm.html.twig' %}
 
-        <h3>Edit occupation</h3>
-    <ul>
+
+    <div id="institution_form">
+        <h1>Edit institution <span class="editLink"><a href="{{ path('institution_view', {'institution_id':institution.id}) }}">[view]</a></span></h1>
+
+        <ul>
         <li>
             {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
             {{ form_widget(form) }}
             {{ form_end(form) }}
         </li>
     </ul>
+    </div>
+
+    <div id='map'></div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    {# Map libraries #}
+    <script src='https://api.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js'></script>
+    <script src="{{ asset('/js/mapFunctions.js') }}"></script>
+    {# ---------------------------------------- #}
+
+    {# Editing scripts#}
+    <script src="{{ asset('js/jquery-ui-1.12.1/jquery-ui.js') }}"></script>
+    <script src="{{ asset('js/editFunctions.js') }}"></script>
+    <script src="{{ asset('js/tinymce/tinymce.min.js') }}"></script>
+
+
+
+{% endblock %}
+
+{% block customJavascripts %}
+    <script>
+        tinymce.init({
+            selector: 'textarea.tinymce',  // change this value according to your HTML
+            toolbar: 'undo redo | styleselect | bold italic | link image'
+        });
+    </script>
+    {# ---------------------------------------- #}
+
+    {# Page specific javascript#}
+    {{ include('institution/edit.js.twig') }}
 {% endblock %}

@@ -21,7 +21,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
 
-class PlaceType extends \Symfony\Component\Form\AbstractType
+class InstitutionPlaceType extends \Symfony\Component\Form\AbstractType
 {
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -34,12 +34,13 @@ class PlaceType extends \Symfony\Component\Form\AbstractType
                 'label' => 'Parent place',
                 'class' => Place::class,
                 'placeholder' => 'None',
-                'empty_data' => null))
+                'empty_data' => null,
+                'required' => false))
             ->add('type', ChoiceType::class, array(
-                "choices" => $typeChoices))
-            ->add('lng', TextType::class)
-            ->add('lat', TextType::class)
-            ->add('Create', SubmitType::class, array('label' => 'Submit'));
+                "choices" => $typeChoices,
+                'required' => false))
+            ->add('lng', TextType::class, array('required' => false))
+            ->add('lat', TextType::class, array('required' => false));
     }
 
     public function configureOptions(OptionsResolver $resolver)

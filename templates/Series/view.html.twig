@@ -1,24 +1,87 @@
 {% extends 'base.html.twig' %}
-{% block title %}Research database -> archives -> {{ archive.name }} {% endblock %}
+{% block title %}Research database -> {{ series.name }} {% endblock %}
 
 {% block body %}
+    {% form_theme childForm 'form/seriesForm.html.twig' %}
+    {% form_theme volumeForm 'form/volumeForm.html.twig' %}
+
 
     <div id="index_area">
 
-        {% if archive.parent %}
+        <?php if($parent_archive&&($serie['id']!=452&&$serie['id']!=453)):?>
+        {% if series.archive %}
             Parent archive:
-            <a href="{{ path('archive_view', {'archive_id':archive.parent.id}) }}">
-                {{ archive.parent.name }}
+            <a href="{{ path('archive_view', {'archive_id':series.archive.id}) }}">
+                {{ series.archive.name }}
+            </a><br>
+        {% endif %}
+
+        {% if series.parent %}
+            Parent series:
+            <a href="{{ path('series_view', {'series_id':series.parent.id}) }}">
+                {{ series.parent.name }}
             </a>
         {% endif %}
 
-        <h3>{{ archive.name }}</h3>
-        {% import "archive/archiveHierarchy.html.twig" as list %}
-        {{ list.archiveHierary(archive.children) }}
+        <h1>{{ series.name }} {%if series.startDate is not null %} <span class="dates">({{ series.textStartDate }}–{{ series.textEndDate }})</span>{% endif %}</h1>
 
         {% import "series/seriesHierarchy.html.twig" as seriesList %}
-        {{ seriesList.seriesHierarchy(archive.series) }}
+        {{ seriesList.seriesHierarchy(series.children) }}
 
+        {% if series.volumes|length > 0 %}
+        <h3>Volumes in series</h3>
+        <table id="volume_index" class="index">
+            <tr id="header_row">
+                <th>Code</th><th>Time</th><th>Notes</th><th>#Sources</th><th></th>
+            </tr>
+            {% for volume in series.volumes %}
+                <tr>
+                    <td>
+                        <a href="{{ path('volume_view', {'volume_id':volume.id}) }}">
+                            {{ volume.abbreviation }} {% if volume.name %} {{ volume.name }} {% endif %}
+                        </a>
+                        <a href="{{ path('volume_edit', {'volume_id':volume.id}) }}"><img src="{{ asset('images/edit.png') }}" title="edit" alt="edit"></a>
+
+                    </td>
+                    <td>
+                        {% if volume.startDate %} ({{volume.fuzzyStartDate.dateString}}{% endif %}{% if volume.endDate %} — {{ volume.fuzzyEndDate.dateString }}{% endif %}{% if volume.startDate or volume.endDate %}){% endif %}
+                    </td>
+                    <td>
+                        {{ volume.description }}
+                    </td>
+                    <td>
+                        {{ volume.numberOfSources }}
+                    </td>
+                    <td>
+                        <a href="{{ path('volume_delete', {'volume_id':volume.id}) }}" onclick="return confirmDelete('volume');"><img src="{{ asset('images/delete.png') }}" alt="delete" title="delete"></a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+    </div>
+    <div id="childForms">
+        <div class="addInfoBox">
+        <h3>Create child series</h3>
+        {{ form_start(childForm, {'attr': {'novalidate': 'novalidate'}}) }}
+        {{ form_widget(childForm) }}
+        {{ form_widget(childForm._token) }}
+        {{ form_end(childForm, {'render_rest': false}) }}
+        </div>
+        <div class="addInfoBox">
+        <h3>Create child volume</h3>
+        {{ form_start(volumeForm, {'attr': {'novalidate': 'novalidate'}}) }}
+        {{ form_widget(volumeForm) }}
+        {{ form_widget(volumeForm._token) }}
+        {{ form_end(volumeForm, {'render_rest': false}) }}
+        </div>
+        <div class="addInfoBox">
+        <h3>Import volumes from NAD</h3>
+        {{ form_start(NADForm, {'attr': {'novalidate': 'novalidate'}}) }}
+        {{ form_widget(NADForm) }}
+        {{ form_widget(NADForm._token) }}
+        {{ form_end(NADForm, {'render_rest': false}) }}
+        </div>
     </div>
 
 {% endblock %}
@@ -26,7 +89,7 @@
 {% block javascripts %}
     <script type="text/javascript">
         function confirmDelete() {
-            return confirm('Are you sure you want to delete this archive?');
+            return confirm('Are you sure you want to delete this series?');
         }
     </script>
 {% endblock %}

@@ -1,14 +1,14 @@
 {% extends 'base.html.twig' %}
-{% block title %}Research database -> actors -> {{ actor.firstName }} {{ actor.surname }}{% endblock %}
+{% block title %}Research database -> sources -> {{ source.title }}{% endblock %}
 {% block body %}
     <script type="text/javascript">
         function confirmDelete() {
-            return confirm('Are you sure you want to delete this actor?');
+            return confirm('Are you sure you want to delete this source?');
         }
     </script>
 
     <div id="index_area">
-        <h1>{{ actor.firstName }} {{ actor.surname }}</h1>
+        <h1>{{ source.title }}</h1>
 
 
         <ul>

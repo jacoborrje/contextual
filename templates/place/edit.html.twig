@@ -1,13 +1,100 @@
 {% extends 'base.html.twig' %}
-{% block title %}Research database -> edit archive{% endblock %}
-{% block body %}
+{% block title %}Research database -> edit place{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link href='https://api.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css' rel='stylesheet' />
+{% endblock %}
 
-        <h3>Edit archive</h3>
-    <ul>
-        <li>
-            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-            {{ form_widget(form) }}
-            {{ form_end(form) }}
-        </li>
-    </ul>
+{% block body %}
+    {% form_theme form 'form/placeForm.html.twig' %}
+
+    <div id="place_index">
+        <h1>Edit place <span class="editLink"><a href="{{ path('place_view', {'place_id':place.id}) }}">[view]</a></span></h1>
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+    <div>
+        {{ form_label(form.name) }}
+        {{ form_errors(form.name) }}
+        {{ form_widget(form.name) }}
+        {{ form_help(form.name) }}
+    </div>
+    <div>
+        {{ form_label(form.parent) }}
+        {{ form_errors(form.parent) }}
+        {{ form_widget(form.parent) }}
+        {{ form_help(form.parent) }}
+    </div>
+    <div>
+        {{ form_label(form.type) }}
+        {{ form_errors(form.type) }}
+        {{ form_widget(form.type) }}
+        {{ form_help(form.type) }}
+    </div>
+    <div>
+        {{ form_label(form.lng) }}
+        {{ form_errors(form.lng) }}
+        {{ form_widget(form.lng) }}
+        {{ form_help(form.lng) }}
+    </div>
+    <div>
+        {{ form_label(form.lat) }}
+        {{ form_errors(form.lat) }}
+        {{ form_widget(form.lat) }}
+        {{ form_help(form.lat) }}
+    </div>
+    <div>
+        {{ form_label(form.description) }}
+        {{ form_errors(form.description) }}
+        {{ form_widget(form.description) }}
+        {{ form_help(form.description) }}
+    </div>
+    <div class="fileDiv">
+        {% if place.image %}
+            <img src="{{ asset('placeimages/' ~ place.image) }}"><br>
+            <a href="{{ path('place_remove_image', {'place_id':place.id, 'image_id':place.image.id}) }}" onclick="return confirmDelete('image');">Delete image</a>
+        {% else %}
+            <div id="no_uploaded_files">
+                <div class="box">
+                    <div class="box__input">
+                        {{ form_row(form.image) }}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    <div>
+        {{ form_label(form.create) }}
+        {{ form_widget(form.create) }}
+    </div>
+    {{ form_widget(form._token) }}
+    {{ form_end(form, {'render_rest': false}) }}
+    </div>
+    <div id='map'></div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {# Map libraries #}
+    <script src='https://api.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js'></script>
+    <script src="{{ asset('/js/mapFunctions.js') }}"></script>
+    {# ---------------------------------------- #}
+
+    {# Editing scripts#}
+    <script src="{{ asset('js/editFunctions.js') }}"></script>
+
+    <script src="{{ asset('js/tinymce/tinymce.min.js') }}"></script>
+
+    <script>
+        tinymce.init({
+        selector: 'textarea.tinymce',  // change this value according to your HTML
+        toolbar: 'undo redo | styleselect | bold italic | link image'
+        });
+    </script>
+    {# ---------------------------------------- #}
+{% endblock %}
+
+{% block customJavascripts %}
+    {# Page specific javascript#}
+    {{ include('place/edit.js.twig') }}
 {% endblock %}

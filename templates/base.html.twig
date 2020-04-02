@@ -51,12 +51,12 @@
 
 
 {% macro menuItem(name, url) %}
-    {% spaceless %}
+    {% apply spaceless %}
         {% set currentUrl = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
         {% set isActive = currentUrl == url %}
 
         <li{% if isActive %} class="is-active"{% endif %}>
             <a href="{{ url }}">{{ name|trans() }}</a>
         </li>
-    {% endspaceless %}
+    {% endapply %}
 {% endmacro %}

@@ -1,63 +1,73 @@
 {% extends 'base.html.twig' %}
-{% block title %}Research database -> {{ series.name }} {% endblock %}
+{% block title %}Research database -> {{ volume.name }} {% endblock %}
 
 {% block body %}
+    {% form_theme form 'form/sourceform.html.twig' %}
 
     <div id="index_area">
+        <h1>
+            {% if volume.name %} {{ volume.name }}
+            {%  else %}{{ volume.series.name }} – vol. {{ volume.abbreviation }}{% endif %}
+        </h1>
 
-        <?php if($parent_archive&&($serie['id']!=452&&$serie['id']!=453)):?>
-        {% if series.archive %}
-            Parent archive:
-            <a href="{{ path('archive_view', {'archive_id':series.archive.id}) }}">
-                {{ series.archive.name }}
-            </a><br>
-        {% endif %}
-        {% if series.parent %}
+        {% if volume.series %}
             Parent series:
-            <a href="{{ path('series_view', {'series_id':series.parent.id}) }}">
-                {{ series.parent.name }}
+            <a href="{{ path('series_view', {'series_id':volume.series.id}) }}">
+                {{ volume.series.name }}
             </a>
         {% endif %}
 
-        <h3>{{ series.name }}</h3>
-
-        {% import "series/seriesHierarchy.html.twig" as seriesList %}
-        {{ seriesList.seriesHierarchy(series.children) }}
-
-        <h3>Volumes in series</h3>
-        <table id="volume_index" class="index">
-            <tr id="header_row">
-                <th>Code</th><th>Time</th><th>Notes</th><th>#Sources</th><th></th>
-            </tr>
-            {% for volume in series.volumes %}
+        {% if(volume.sources) %}
+        <table class="object_table">
+            {% for source in volume.sources %}
                 <tr>
+                    <td>{{ source.textDate }}</td>
                     <td>
-                        <a href="{{ path('volume_view', {'volume_id':volume.id}) }}">
-                            {{ volume.abbreviation }} {% if volume.name %} {{ volume.name }} {% endif %}
-                        </a>
+                        <a href="{{ path('source_edit', {'source_id':source.id}) }}">{{ source.listTitle }}</a>
                     </td>
-                    <td>
-                        {% if volume.start_date %} ({{volume.fuzzyStartDate.dateString}}{% endif %}{% if volume.start_date %} — {{ volume.fuzzyEndDate.dateString }}{% endif %} {% if volume.startDate or volume.endDate %}){% endif %}
-                    </td>
-                    <td>
-                        <?php echo $volume['description'];?>
-                    </td>
-                    <td>
-                        <?php echo $volume['#sources'];?>
-                    </td>
-                    <td>
-                        <a href="/research-database/index.php/volumes/delete/<? echo $volume['id'];?>" onclick="return confirmDelete('volume');">Delete</a>
-                    </td>
+                    <td>{% if source.files|length > 0 %} <img src="{{ asset('images/pdf.png')}}" title="has pdf" alt="has pdf"> {% endif %}</td>
+                    <td>{% if source.hasTranscription %} <img src="{{ asset('images/transcription.png')}}" title="has transcription" alt="has transcription"> {% endif %}</td>
+                    <td>{% if source.hasTopics %} <img src="{{ asset('images/topics.png')}}" title="has topics" alt="has topics"> {% endif %}</td>
+                    <td>{% if source.hasActions %} <img src="{{ asset('images/actions.png')}}" title="has actions" alt="has actions"> {% endif %}</td>
+                    <td><a href="{{ path('source_delete', {'source_id':source.id}) }}"><img src="{{ asset('images/delete.png') }}" title="delete" alt="delete" onclick="return confirmDelete('source');"/></a></td>
+                    <td><a href="{{ path('source_duplicate', {'source_id':source.id}) }}"><img src="{{ asset('images/duplicate.png') }}" title="duplicate" alt="duplicate"/></a></td>
+                    <td>{{ source.placeInVolume }}</td>
+                    <td>{{ source.shortLanguageString }}</td>
+
                 </tr>
             {% endfor %}
+        </table>
+        {% endif %}
+
     </div>
 
-{% endblock %}
+    <div id="childForms">
+        <h3>Create child source</h3>
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+        {{ form_widget(form) }}
+        {{ form_widget(form._token) }}
+        {{ form_end(form, {'render_rest': false}) }}
+
+        {% if alvinImportForm is defined %}
+            <h3>Import source from Alvin</h3>
+            {{ form_start(alvinImportForm, {'attr': {'novalidate': 'novalidate'}}) }}
+            {{ form_widget(alvinImportForm) }}
+            {{ form_widget(alvinImportForm._token) }}
+            {{ form_end(alvinImportForm, {'render_rest': false}) }}
+        {% endif %}
+    </div>
+
+    {% if newSource is defined %}
+        {{ dump(newSource) }}
+    {% endif %}
+
+
+    {% endblock %}
 
 {% block javascripts %}
     <script type="text/javascript">
         function confirmDelete() {
-            return confirm('Are you sure you want to delete this archive?');
+            return confirm('Are you sure you want to delete this source?');
         }
     </script>
 {% endblock %}

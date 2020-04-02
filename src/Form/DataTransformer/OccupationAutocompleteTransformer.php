@@ -7,45 +7,44 @@
  */
 namespace App\Form\DataTransformer;
 
-use App\Entity\Institution;
 use Symfony\Component\Form\DataTransformerInterface;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
-use App\Entity\Actor;
+use App\Entity\Occupation;
 
-class InstitutionAutocompleteTransformer implements DataTransformerInterface
+class OccupationAutocompleteTransformer implements DataTransformerInterface
 {
     private $entityManager;
 
-    public function __construct(ObjectManager $entityManager)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
     }
 
-    public function transform($institution)
+    public function transform($occupation)
     {
-        if (null === $institution) {
+        if (null === $occupation) {
             return '';
         }
 
-        return $institution->getId();
+        return $occupation->getId();
     }
 
-    public function reverseTransform($institutionId)
+    public function reverseTransform($occupationId)
     {
-        if (!$institutionId) {
+        if (!$occupationId) {
             return null;
         }
 
-        $institution = $this->entityManager
-            ->getRepository(Institution::class)->findOneBy(array('id' => $institutionId));
+        $occupation = $this->entityManager
+            ->getRepository(Occupation::class)->findOneBy(array('id' => $occupationId));
 
-        if (null === $institution) {
-            throw new TransformationFailedException(sprintf('Actor "%s" does not exist',
-                $institutionId
+        if (null === $occupation) {
+            throw new TransformationFailedException(sprintf('Occupation "%s" does not exist',
+                $occupationId
             ));
         }
 
-        return $institution;
+        return $occupation;
     }
 }

@@ -1,13 +1,89 @@
 {% extends 'base.html.twig' %}
-{% block title %}Research database -> edit place{% endblock %}
+{% block title %}Research database -> Add new place{% endblock %}
 {% block body %}
 
-        <h3>Edit place</h3>
-    <ul>
-        <li>
-            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-            {{ form_widget(form) }}
-            {{ form_end(form) }}
-        </li>
-    </ul>
+    <div id="place_index">
+        <h1>
+            Add place
+            {% if(place.parent) %}
+                <span class="editLink"><a href="{{ path('place_view', {'place_id':place.parent.id}) }}">[back]</a>
+            {% endif %}
+        </h1>
+        <ul>
+            <li>
+                {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                {{ form_widget(form) }}
+                {{ form_end(form) }}
+            </li>
+        </ul>
+    </div>
+
+
+    <div id='map'></div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }}
+    {# Map libraries #}
+    <script src='https://api.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js'></script>
+    <script src="{{ asset('/js/mapFunctions.js') }}"></script>
+    {# ---------------------------------------- #}
+
+    {# Editing scripts#}
+    <script src="{{ asset('js/editFunctions.js') }}"></script>
+
+    <script src="{{ asset('js/tinymce/tinymce.min.js') }}"></script>
+
+    <script>
+        tinymce.init({
+            selector: 'textarea.tinymce',  // change this value according to your HTML
+            toolbar: 'undo redo | styleselect | bold italic | link image'
+        });
+    </script>
+    {# ---------------------------------------- #}
+
+    <script>
+
+
+</script>
+{% endblock %}
+{% block customJavascripts %}
+    <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoiamFjb2JvcnJqZSIsImEiOiJjanFtOWtwbmg2a2YwNDNwcGg2cG1sZzN1In0.c11tDOxEs5T5YHgbO0TAKg';
+    var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/jacoborrje/cjslfs6640gc61gk4nrw1hagf',
+    center: [0,60],
+    zoom: 3
+    });
+    var $place_parent_select = $('#place_parent');
+
+
+    map.on('load', function () {
+    if($place_parent_select.val()) {
+    updatePlaceParent($place_parent_select.val());
+    }
+    geojson = getGeojsonView($place_parent_select.val());
+    map.flyTo({center: geojson[0].features[0].geometry.coordinates, zoom: 13});
+    });
+
+    var lng_input = 'place_lng';
+    var lat_input = 'place_lat';
+    map.on('click', addDraggableMarker);
+
+    $place_parent_select.on('change', function (){
+    if($place_parent_select.val())
+    updatePlaceParent($place_parent_select.val());
+    else{
+    var mapLayer = map.getLayer('place_overlay');
+    if(typeof mapLayer !== 'undefined') {
+    map.removeLayer('place_overlay').removeSource('place_overlay');
+    map.flyTo({center: [0,60], zoom: 3});
+
+    }
+    }
+    });
+    </script>
 {% endblock %}

@@ -1,21 +1,26 @@
 {% extends 'base.html.twig' %}
-{% block title %}Research database -> archives{% endblock %}
+{% block title %}Research database -> actors{% endblock %}
 {% block body %}
 
     <div id="index_area">
-        <h3>Institutions</h3>
+        <h1>Actors</h1>
             <ul>
-                {% for institution in all_institutions %}
-                    <li>{{ institution.name }}</li>
+                {% for actor in all_actors %}
+                    <li><a href="{{ path('actor_view', {'actor_id':actor.id}) }}">{{ actor.firstName }} {{ actor.surname }}</a> ({{ actor.birthYear }} – {{ actor.deathYear }})</li>
                 {% endfor %}
             </ul>
+        <a href="{{ path('actor_create') }}">Create new actor</a>
     </div>
-    <div id="mapid"></div>
 
+    <div id="childForms">
+        {% if alvinImportForm is defined %}
+            <h3>Import actor from Alvin</h3>
+            {{ form_start(alvinImportForm, {'attr': {'novalidate': 'novalidate'}}) }}
+            {{ form_widget(alvinImportForm) }}
+            {{ form_widget(alvinImportForm._token) }}
+            {{ form_end(alvinImportForm, {'render_rest': false}) }}
+        {% endif %}
+    </div>
 
-
-    {#<h3>Create new Archive</h3>
-    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-    {{ form_widget(form) }}
-    {{ form_end(form) }}#}
 {% endblock %}
+

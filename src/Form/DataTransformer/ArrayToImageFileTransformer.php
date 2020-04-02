@@ -9,9 +9,10 @@ namespace App\Form\DataTransformer;
 
 use App\Entity\ImageFile;
 use App\Entity\PdfFile;
+use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Form\DataTransformerInterface;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
 use Symfony\Component\Validator\Constraints\Collection;
 use Vich\UploaderBundle\Form\Type\VichFileType;
@@ -19,67 +20,46 @@ use Vich\UploaderBundle\Entity\File;
 use \Imagick;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-class VichImageToImageFileTransformer implements DataTransformerInterface
+class ArrayToImageFileTransformer implements DataTransformerInterface
 {
     private $entityManager, $rootDir, $tempFolder;
 
-    public function __construct(ObjectManager $entityManager)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
         $this->tempFolder = $this->rootDir . '/public/sources/temp/';
     }
 
-    public function reverseTransform($VichImageFile)
+    public function reverseTransform($array)
     {
-        echo "Test";
-        print_r($VichImageFile);
-        $fileContents = null;
+        $uploadedFile = $array['fileContents'];
 
-        if (null === $fileContents || count($fileContents)===0) {
+        if (is_null($uploadedFile)) {
             return null;
         }
-        else if (count($fileContents)===1){
-            $pdfFile = new ImageFile();
-            $uploadedFile = $fileContents[0];
-            //echo $uploadedFile->getErrorMessage();
+        else{
+            $imageFile = new ImageFile();
             $type = explode("/",$uploadedFile->getMimeType())[1];
-            if($type === 'pdf'){
-                $pdfFile->setFileContents($uploadedFile);
-                $pdfFile->setType($type);
-                return $pdfFile;
+            if($type === 'jpeg'||$type === 'png'){
+                $imageFile->setFileContents($uploadedFile);
+                $imageFile->setSize($uploadedFile->getSize());
+                $imageFile->setType($type);
+                return $imageFile;
             }
             else{
                 return null;
             }
         }
-        else if (count($fileContents)>1){
-            $images = [];
-            foreach($fileContents as $file) {
-                $type = explode("/",$file->getMimeType())[1];
-                if($type === 'jpeg') {
-                    $images[] = $file->getPathname();
-                }
-            }
-
-            $pdf = new Imagick($images);
-            $pdf->setImageFormat('pdf');
-            $filename = $this->tempFolder.'combined.pdf';
-            $pdf->writeImages($filename, true);
-
-            $file = new UploadedFile($filename, "combined.pdf", null, null,  true);
-
-            $pdfFile = new PdfFile();
-            $pdfFile->setFileContents($file);
-            $pdfFile->setType('pdf');
-            return $pdfFile;
-        }
-        else{
-            return null;
-        }
     }
 
     public function transform($file)
     {
-        return [$file];
+        if(is_null($file))
+            return null;
+        else {
+            $array = [];
+            $array['0']['filecontents'] = $file->getFilecontents();
+            return $array;
+        }
     }
 }

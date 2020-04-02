@@ -30,15 +30,17 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 
-class FoundActorType extends \Symfony\Component\Form\AbstractType
+class FoundPlaceType extends \Symfony\Component\Form\AbstractType
 {
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $typeChoices = array('Author' => 1, 'Recipient' => 2, 'signer' => 3, 'mention' => 4);
+        $typeChoices = array('Author place' => 1, 'Recipient place' => 2, 'mention' => 3);
 
         $builder
-            ->add('actorId', HiddenType::class)
+            ->add('placeId', HiddenType::class)
+            ->add('startPos', HiddenType::class)
+            ->add('endPos', HiddenType::class)
             ->add('type', ChoiceType::class, array(
                 "choices" => $typeChoices,
                 "label" => false,

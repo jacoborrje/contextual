@@ -1,20 +1,49 @@
 {% extends 'base.html.twig' %}
-{% block title %}Research database -> archives{% endblock %}
+{% block title %}Research database -> places{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href='https://api.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css' rel='stylesheet' />
+{% endblock %}
+
 {% block body %}
-    <script type="text/javascript">
-        function confirmDelete() {
-            return confirm('Are you sure you want to delete this archive?');
-        }
-    </script>
 
-    <div id="index_area">
-        {% import "archive/archiveHierarchy.html.twig" as list %}
-        {{ list.archiveHierary(archives) }}
+
+    <div id="place_index">
+        <h1>Places <a href="{{ path('place_create') }}" title="Add new place" alt="Add new place"><img src="{{ asset('images/add_18.png') }}"></a></h1>
+        {% import "place/placeHierarchy.html.twig" as list %}
+            {{ list.placeHierary(places) }}
     </div>
+    <div id='map'></div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    {# Map libraries #}
+    <script src='https://api.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js'></script>
+    <script src="{{ asset('/js/mapFunctions.js') }}"></script>
+    {# ---------------------------------------- #}
+
+{% endblock %}
 
 
-        {#<h3>Create new Archive</h3>
-        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-        {{ form_widget(form) }}
-        {{ form_end(form) }}#}
+{% block customJavascripts %}
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiamFjb2JvcnJqZSIsImEiOiJjanFtOWtwbmg2a2YwNDNwcGg2cG1sZzN1In0.c11tDOxEs5T5YHgbO0TAKg';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/jacoborrje/cjslfs6640gc61gk4nrw1hagf',
+            center: [0,60],
+            zoom: 2
+        });
+
+        console.log('map:');
+        console.log(map);
+
+        var geojson = getGeojsonAllPlaces();
+        placeMapMarkers(geojson);
+
+    </script>
 {% endblock %}

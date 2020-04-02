@@ -9,7 +9,7 @@
 
 namespace App\Form;
 
-use App\Entity\Topic;
+use App\Entity\Occupation;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 
@@ -19,13 +19,13 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 
-class TopicType extends \Symfony\Component\Form\AbstractType
+class OccupationType extends \Symfony\Component\Form\AbstractType
 {
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('topic', TextType::class)
+            ->add('name', TextType::class)
             ->add('Create', SubmitType::class, array('label' => 'Submit'))
         ;
     }
@@ -33,7 +33,7 @@ class TopicType extends \Symfony\Component\Form\AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => Topic::class,
+            'data_class' => Occupation::class,
         ));
     }
 

@@ -9,14 +9,13 @@
 namespace App\Form\Type;
 
 
-use App\Form\DataTransformer\ActorAutocompleteTransformer;
+use App\Form\DataTransformer\TimeTransformer;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Doctrine\ORM\EntityManager;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-class RelationshipActorType extends AbstractType
+class TimeType extends AbstractType
 {
     protected $em;
 
@@ -26,11 +25,8 @@ class RelationshipActorType extends AbstractType
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options) {
-        $autocompleteTransformer = new ActorAutocompleteTransformer($this->em);
-
-        $builder
-            ->addModelTransformer($autocompleteTransformer)
-        ;
+        $timeTransformer = new TimeTransformer($this->em);
+        $builder->addModelTransformer($timeTransformer);
     }
 
     public function getParent() {
@@ -38,7 +34,7 @@ class RelationshipActorType extends AbstractType
     }
 
     public function getName() {
-        return 'RelationshipActor';
+        return 'Time';
     }
 
 }

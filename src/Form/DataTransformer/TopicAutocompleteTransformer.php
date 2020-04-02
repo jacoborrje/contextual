@@ -8,43 +8,43 @@
 namespace App\Form\DataTransformer;
 
 use Symfony\Component\Form\DataTransformerInterface;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
-use App\Entity\Place;
+use App\Entity\Topic;
 
-class PlaceAutocompleteTransformer implements DataTransformerInterface
+class TopicAutocompleteTransformer implements DataTransformerInterface
 {
     private $entityManager;
 
-    public function __construct(ObjectManager $entityManager)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
     }
 
-    public function transform($place)
+    public function transform($topic)
     {
-        if (null === $place) {
+        if (null === $topic) {
             return '';
         }
 
-        return $place->getName();
+        return $topic->getTopic();
     }
 
-    public function reverseTransform($placeName)
+    public function reverseTransform($topicName)
     {
-        if (!$placeName) {
+        if (!$topicName) {
             return null;
         }
 
-        $place = $this->entityManager
-            ->getRepository(Place::class)->findOneBy(array('name' => $placeName));
+        $topic = $this->entityManager
+            ->getRepository(Topic::class)->findOneBy(array('topic' => $topicName));
 
-        if (null === $place) {
-            throw new TransformationFailedException(sprintf('The place "%s" does not exist in the database',
-                $placeName
+        if (null === $topic) {
+            throw new TransformationFailedException(sprintf('The topic "%s" does not exist in the database',
+                $topicName
             ));
         }
 
-        return $place;
+        return $topic;
     }
 }

@@ -1,10 +1,14 @@
-{% block newMentionsCheckboxes %}
-    <li id="newMentionsCheckboxes" class="hidden">
+{% block newMentionsLis %}
+    <li id="mention_index__preview" class="hidden">
+        Enter new mention below
+    </li>
+    <li id="mentionCheckBoxes_index_" class="hidden">
         <p>
-            <label>Actor</label><input type="checkbox" name="actor" value="actorCheck" id="actorCheck" onclick="toggleDropdownActivation(this, $('#editActorMentionDropdown_index__actor'),'table-row')">
-            <label>Institution</label><input type="checkbox" name="institution" value="institutionCheck" id="institutionCheck" onclick="toggleDropdownActivation(this, $('#editInstitutionMentionDropdown_index_'),'table-row')">
-            <label>Place</label><input type="checkbox" name="place" value="placeCheck" id="placeCheck" onclick="toggleDropdownActivation(this, $('#editPlaceMentionDropdown_index_'),'table-row')">
-            <label>Source</label><input type="checkbox" name="source" checked {% endif %} value="sourceCheck" id="sourceCheck" onclick="toggleDropdownActivation(this, $('#editSourceMentionDropdown_index_'),'table-row')">
+            <label>Actor</label><input type="checkbox" name="actor" value="actorCheck" id="actorCheck_index_" class="actorCheck" onclick="toggleDropdownActivation(this, $('#editActorMentionDropdown_index_'),'table-row')">
+            <label>Institution</label><input type="checkbox" name="institution" value="institutionCheck" class="actorCheck" id="institutionCheck_index_" onclick="toggleDropdownActivation(this, $('#editInstitutionMentionDropdown_index_'),'table-row')">
+            <label>Place</label><input type="checkbox" name="place" value="placeCheck" id="placeCheck_index_" class="placeCheck" onclick="toggleDropdownActivation(this, $('#editPlaceMentionDropdown_index_'),'table-row')">
+            <label>Event Place</label><input type="checkbox" name="place" value="eventPlaceCheck" id="eventPlaceCheck_index_" class="eventPlaceCheck" onclick="toggleDropdownActivation(this, $('#editEventPlaceMentionDropdown_index_'),'table-row')">
+            <label>Source</label><input type="checkbox" name="source" value="sourceCheck" id="sourceCheck_index_" class="sourceCheck" onclick="toggleDropdownActivation(this, $('#editSourceMentionDropdown_index_'),'table-row')">
         </p>
     </li>
 {% endblock %}

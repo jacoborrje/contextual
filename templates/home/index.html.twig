@@ -1,26 +1,80 @@
 {% extends 'base.html.twig' %}
-{% block title %}Research database -> archives{% endblock %}
+{% block title %}Research database -> dashboard{% endblock %}
 {% block body %}
-    <script type="text/javascript">
-        function confirmDelete() {
-            return confirm('Are you sure you want to delete this archive?');
-        }
-    </script>
 
     <div id="index_area">
-        <h1>Archives</h1>
-        {% import "archive/archiveHierarchy.html.twig" as list %}
-        {{ list.archiveHierary(archives) }}
+        <h1>Research Database</h1>
+
+        <h2>Last edited sources</h2>
+            <table class="object_table">
+                <tr>
+                    <th>
+                        Path
+                    </th>
+                    <th>
+                        Date
+                    </th>
+                    <th>
+                        Title
+                    </th>
+                </tr>
+            {% for source in lastSources%}
+                <tr>
+                <td>{{ source.sourcePath }}</td>
+                <td>{{ source.textDate }}</td>
+                <td>
+                    <a href="{{ path('source_edit', {'source_id':source.id}) }}">{{ source.title }}</a>
+                </td>
+                <td>{% if source.files|length > 0 %} <img src="{{ asset('images/pdf.png')}}" title="has pdf" alt="has pdf"> {% endif %}</td>
+                <td>{% if source.hasTopics %} <img src="{{ asset('images/topics.png')}}" title="has topics" alt="has topics"> {% endif %}</td>
+                </tr>
+            {% endfor %}
+            </table>
+
+        <h2>Last edited actors</h2>
+        <table class="object_table">
+            {% for actor in lastActors%}
+                <tr>
+                    <td><a href="{{ path('actor_view', {'actor_id':actor.id}) }}">{{ actor.surname }}, {{ actor.firstName }} </a></td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        <h2>Last edited places</h2>
+        <table class="object_table">
+            {% for place in lastPlaces%}
+                <tr>
+                    <td><a href="{{ path('place_view', {'place_id':place.id}) }}">
+                            {{ place.name }}
+                        </a></td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        <h2>Last edited volumes</h2>
+        <table class="object_table">
+            <tr>
+                <th>Code</th><th>#Sources</th><th></th>
+            </tr>
+            {% for volume in lastVolumes%}
+                <tr>
+                    <td>
+                        <a href="{{ path('volume_view', {'volume_id':volume.id}) }}">
+                            {{ volume.volumePath }} {% if volume.name %} {{ volume.name }} {% endif %}
+                        </a>
+                    </td>
+                    <td>
+                        {{ volume.numberOfSources }}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+
+
+
     </div>
 
     <div class="addInfoBox">
-    <h3>Create new Archive</h3>
-    <ul>
-        <li>
-            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-            {{ form_widget(form) }}
-            {{ form_end(form) }}
-        </li>
-    </ul>
+
     </div>
 {% endblock %}

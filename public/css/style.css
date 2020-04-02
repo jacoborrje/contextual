@@ -1,8 +1,32 @@
+body{
+    font-family: 'Open Sans', sans-serif;
+    margin:0px;
+}
+
+h1, h2, h3, h4, top_menu{
+    font-family: 'Voltaire', sans-serif;
+    font-weight: 300;
+    margin-top:10px;
+}
+
+h1{
+    color:#333333;
+    font-size:2em;
+}
+
+h2{
+    color:#333333;
+    font-size:1.5em;
+
+}
+
+
 #top_menu{
     height:25px;
     background-color:#2A88AD;
     padding-top:5px;
     margin-bottom:0px;
+    margin-top:0px;
 }
 
 #top_menu li{
@@ -18,15 +42,18 @@
     text-decoration:none;
 }
 
-
 #main_text_area{
     margin-left:0px;
     margin-top:0px;
-
 }
 
 #main_text_area ul{
     list-style:none;
+}
+
+.rightBox{
+    float:right;
+    width:49%;
 }
 
 .form-style-10{
@@ -169,9 +196,9 @@
 }
 
 #no_uploaded_files{
-    width:48%;
-    height:550px;
-    background-color:#dddddd;
+    width:275px;
+    height:300px;
+    background-color:white;
     float:left;
     clear:right;
 }
@@ -216,8 +243,8 @@
 
 #source_frame{
     float:left;
-    height:100%;
-    width:49.7%;
+    height:700px;
+    width:100%;
     margin:0px;
     padding:0px;
 }
@@ -231,6 +258,7 @@
     height:2%;
     width:100%;
     padding:4px;
+    clear:left;
 }
 
 form{
@@ -244,25 +272,41 @@ form{
     padding:0px;
 }
 
-#tabs-1, #tabs-2,#tabs-3,#tabs-4,#tabs-5{
+#place_index .tinymce, #institution_form .tinymce{
+    clear:left;
+    height:300px;
+}
+
+#tabs-1, #tabs-2,#tabs-3,#tabs-4,#tabs-5, #tabs2-1, #tabs2-2{
     padding:0px;
 }
 
-.mention{
+.mention, .mentionCheckBoxes{
     display:none;
 }
 
-#action_menu{
+.action_menu{
     background-color:#e9e9e9;
     margin:0px;
     padding:1px;
 }
 
-#tabs {
+.is-active a{
+    font-weight: 600;
+}
+
+#tabs, #tabs2 {
     float: left;
-    width: 50%;
+    width: 49%;
     margin: 0px;
     padding: 0px;
+}
+
+.transcription{
+    line-height: 150%;
+    font-family: 'Open Sans', sans-serif;
+    width:75%;
+    padding:10px;
 }
 
 .index{
@@ -300,13 +344,26 @@ form{
     margin-left:40px;
 }
 
-#index_area, #place_index{
+#index_area{
     margin-left:40px;
     float:left;
-    width:45%
+    width:60%;
 }
 
-#index_area ul, #place_index ul{
+#place_index, #institution_form{
+    margin-left:40px;
+    float:left;
+    width:30%;
+    height: 700px;
+    overflow-y:scroll;
+}
+
+#place_index > ul, #institution_form > ul, h1+ul, h2+ul{
+    margin-left:0px;
+    padding-left:0px;
+}
+
+#index_area ul, #place_index{
     margin-top:0px;
 }
 
@@ -357,11 +414,17 @@ form{
     -moz-box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.13);
     -webkit-box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.13);
     margin-right:5px !important;
+    margin-top:10px;
+    display:inline-block;
 }
 
 .source_topic a:link, .source_topic a:visited, .deleted_topic a:link, .deleted_topic a:visited{
     color:white;
     text-decoration:none;
+}
+
+.source_topic select{
+    display:none;
 }
 
 #new_topic{
@@ -374,14 +437,11 @@ form{
     column-count: 3;
 }
 
-.mentioncheckboxes{
-    display:block;
-}
-.mentioncheckboxes label, .mentioncheckboxes label{
+.mentionCheckBoxes label{
     display:inline;
 }
 
-.newMention label{
+.newMention label, .mention label{
     width:250px !important;
     text-align:left !important;
 }
@@ -429,8 +489,224 @@ form{
     font-size:18px;
 }
 
-#mapid {
-    height: 700px;
-    width:50%;
+
+
+#create_new{
     float:left;
 }
+
+#newTopic{
+    width:250px;
+    margin-top:10px;
+}
+
+#newTopic select{
+    width:75%;
+}
+
+#newTopic button{
+    width:20%;
+}
+
+.hidden{
+    display:none;
+}
+
+#childForms{
+    float:left;
+    margin-top:50px;
+}
+
+#childForms p{
+    margin-top:5px;
+    padding-top:5px;
+    margin-bottom:0px;
+    padding-bottom:0px;
+}
+
+.box__dragndrop,
+.box__uploading,
+.box__success,
+.box__error {
+    display: none;
+}
+
+.box.has-advanced-upload {
+    background-color: white;
+    outline: 2px dashed black;
+    outline-offset: -10px;
+}
+.box.has-advanced-upload .box__dragndrop {
+    display: inline;
+}
+
+.box.is-dragover {
+    background-color: lightgrey;
+}
+
+.box__file + label {
+    font-size: 1.25em;
+    font-weight: 700;
+    color: dimgrey;
+    display: inline-block;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 80px;
+    text-align:center;
+}
+
+.box__file:focus + label{
+    background-color: lightblue;
+}
+
+.box__file + label {
+    cursor: pointer; /* "hand" cursor */
+}
+
+.box__file:focus + label {
+    outline: 1px dotted #000;
+    outline: -webkit-focus-ring-color auto 5px;
+}
+
+.box__file + label * {
+    pointer-events: none;
+}
+
+.box.is-uploading .box__input {
+    visibility: none;
+}
+.box.is-uploading .box__uploading {
+    display: block;
+}
+
+.has-advanced-upload .box__file{
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+.box__input{
+    height: 350px;
+}
+
+.fileDiv+div{
+    margin-top:20px;
+    padding-top:40px;
+    clear:left;
+}
+
+.uploadIcon{
+    opacity:0.5;
+    width:72px;
+    margin-top:50px;
+
+}
+
+#map {
+    height: 700px;
+    width:65%;
+    float:right;
+}
+
+.marker {
+    background-image: url('/images/dot_red.png');
+    background-size: cover;
+    width: 10px;
+    height: 10px;
+    cursor: pointer;
+}
+
+.marker.selected{
+    background-image: url('/images/dot_blue.png') !important;
+}
+
+.mapboxgl-popup {
+    max-width: 400px;
+}
+
+.mapboxgl-popup-content img{
+    float:left;
+    margin-right:10px;
+}
+.mapboxgl-popup-content div {
+    float:left;
+}
+
+
+
+#info {
+    display: block;
+    position: relative;
+    margin: 0px auto;
+    width: 50%;
+    padding: 10px;
+    border: none;
+    border-radius: 3px;
+    font-size: 12px;
+    text-align: center;
+    color: #222;
+    background: #fff;
+}
+
+.inactive{
+    opacity: 0.2;
+}
+
+/* CSS for the actor timeline */
+
+
+#timeline li{
+    margin-bottom: 10px;
+}
+
+.addInfoBox{
+    margin-top:0px;
+}
+
+.addInfoBox h3{
+    padding-top:20px;
+}
+
+.addInfoBox+.addInfoBox{
+    margin-top:10px;
+}
+
+.editLink{
+    font-size: 0.6em;
+}
+
+.timelineIcon{
+    width:40px;
+    float: left;
+
+}
+
+.timelineEntry  {
+    overflow: auto;
+    clear:left;
+    vertical-align: middle;
+}
+
+.entryDate{
+    width: 120px;
+    margin-top:0px;
+    padding-top:0;
+    float:left;
+    vertical-align: middle;
+}
+
+.entryText{
+    margin-bottom: 10px;
+    float:left;
+    overflow:hidden;
+    width:80%;
+}
+
+#sourceMentions{
+    margin-left:0px;
+    padding-left:0px;
+}
+

@@ -8,47 +8,42 @@
 namespace App\Form\DataTransformer;
 
 use Symfony\Component\Form\DataTransformerInterface;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
-use App\Entity\Actor;
+use App\Entity\Topic;
 
-class ActorAutocompleteTransformer implements DataTransformerInterface
+class HiddenToTopicTransformer implements DataTransformerInterface
 {
     private $entityManager;
 
-    public function __construct(ObjectManager $entityManager)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
     }
 
-    public function transform($actor)
+    public function transform($topic)
     {
-        if (null === $actor) {
+        if (null === $topic) {
             return '';
         }
-
-        return $actor->getSurname().", ".$actor->getFirstName();
+        return $topic->getId();
     }
 
-    public function reverseTransform($actorName)
+    public function reverseTransform($id)
     {
-        if (!$actorName) {
+        if (!$id) {
             return null;
         }
 
-        $actorNames = explode (", ", $actorName);
-        $first_name = $actorNames[1];
-        $surname = $actorNames[0];
+        $topic = $this->entityManager
+            ->getRepository(Topic::class)->findOneBy(array('id' => $id));
 
-        $actor = $this->entityManager
-            ->getRepository(Actor::class)->findOneBy(array('first_name' => $first_name, 'surname' => $surname));
-
-        if (null === $actor) {
-            throw new TransformationFailedException(sprintf('Actor "%s" does not exist',
-                $actorName
+        if (null === $topic) {
+            throw new TransformationFailedException(sprintf('Topic with id "%s" does not exist',
+                $id
             ));
         }
 
-        return $actor;
+        return $topic;
     }
 }

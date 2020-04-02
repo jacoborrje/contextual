@@ -1,16 +1,126 @@
 {% extends 'base.html.twig' %}
-{% block title %}Research database -> archives -> {{ archive.name }} {% endblock %}
+{% block title %}Research database -> actors -> {{ actor.firstName }} {{ actor.surname }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href='https://api.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css' rel='stylesheet' />
+{% endblock %}
+
 {% block body %}
     <script type="text/javascript">
         function confirmDelete() {
-            return confirm('Are you sure you want to delete this archive?');
+            return confirm('Are you sure you want to delete this actor?');
         }
     </script>
 
     <div id="index_area">
-        <h3>{{ archive.name }}</h3>
-        {% import "archive/archiveHierarchy.html.twig" as list %}
-        {{ list.archiveHierary(archive.children) }}
+        <h1>{{ actor.firstName }} {{ actor.surname }} <span class="editLink"><a href="{{ path('actor_edit', {'actor_id':actor.id}) }}">[edit]</a></span></h1>
+
+        <div id="timeline">
+        <h2>Timeline</h2>
+        {% for entry in timeline.entries %}
+            <div class="timelineEntry">
+                <span class="entryDate">{{ entry.textDate }}</span>
+                <span class="entryText">{{ entry.entryString|raw}}</span>
+            </div>
+        {% endfor %}
+        </div>
+
+        <select id="mapOverlay" onchange="changeOverlay(this.value)">
+            <option value="0">None</option>
+            {% for overlay in mapOverlays %}
+                <option value="{{ overlay.url }}">{{ overlay.name }}</option>
+            {% endfor %}
+        </select>
+
+        <h2>Description</h2>
+        <p>
+            {{ actor.description|raw }}
+        </p>
+
+        {% if actor.researchNotes %}
+            <h2>Research notes</h2>
+            <p>
+                {{ actor.researchNotes|raw }}
+            </p>
+        {% endif %}
+
+        {% if actor.relationships|length > 0 %}
+            <h2>Relatives</h2>
+            <ul>
+                {% for relationship in actor.relationships %}
+                    <li> {{ relationship.typeString }}
+                        <a href="{{ path('actor_view', {'actor_id':relationship.relatedActor.id}) }}">
+                            {{ relationship.relatedActor.firstName }} {{ relationship.relatedActor.surname }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
     </div>
 
+    <h2>Geo-timeline</h2>
+    <div id="map"></div>
+
+
+{% endblock %}
+
+
+{% block javascripts %}
+    {{ parent() }}
+
+    {# Map libraries #}
+    <script src='https://api.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js'></script>
+    <script src="{{ asset('/js/mapFunctions.js') }}"></script>
+    {# ---------------------------------------- #}
+{% endblock %}
+
+{% block customJavascripts %}
+    {# Page specific javascript#}
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiamFjb2JvcnJqZSIsImEiOiJjanFtOWtwbmg2a2YwNDNwcGg2cG1sZzN1In0.c11tDOxEs5T5YHgbO0TAKg';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/jacoborrje/cjslfs6640gc61gk4nrw1hagf',
+            center: [0,51.51],
+            zoom: 5
+        });
+
+        map.on("load", function() {
+
+            {% for entry in geoTimeline.entries %}
+            placeMapMarker(false, '{{ entry.textDate }}: {{ entry.entryString|e('js')  }}', [{{ entry.lon }}, {{ entry.lat }}])
+            {% endfor %}
+
+            map.addLayer({
+                'id': 'route',
+                'type': 'line',
+                'source': {
+                    'type': 'geojson',
+                    'data': {
+                        "type": "Feature",
+                        'properties': {},
+                        'geometry': {
+                            'type': 'LineString',
+                            'coordinates': [
+                                    {% for entry in geoTimeline.entries %}[{{ entry.lon }}, {{ entry.lat }}] {% if not loop.last %}, {% endif %}{% endfor %}
+                            ]
+                        }
+                    }
+                },
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                'paint': {
+                    'line-color': '#3cb2d0',
+                    'line-width': 3
+                }
+            });
+
+        });
+
+    </script>
+    {# ---------------------------------------- #}
 {% endblock %}

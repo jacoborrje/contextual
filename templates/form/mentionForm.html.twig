@@ -1,5 +1,54 @@
-{# templates/form/sourcetopicform.html.twig #}
-{% block _source_sourceTopics_entry_widget %}
-    {{ form_widget(form.id) }}
-    {{ form_widget(form.topic) }}
+{# templates/form/mentionform.html.twig #}
+{% block _source_mentions_entry_widget %}
+        {{ form_widget(form.info_source) }}
+        <p>
+            {{ form_label(form.verb) }}
+            {{ form_widget(form.verb) }}
+        </p>
+        <p>
+            {{ form_label(form.text_date) }}
+            {{ form_widget(form.text_date) }}
+        </p>
+        <p>
+            {{ form_label(form.time) }}
+            {{ form_widget(form.time) }}
+        </p>
+        <p>
+            {{ form_label(form.description) }}
+            {{ form_widget(form.description) }}
+        </p>
+        <p>
+            {{ form_label(form.startPage) }}
+            {{ form_widget(form.startPage) }}
+
+            {{ form_label(form.endPage) }}
+            {{ form_widget(form.endPage) }}
+        </p>
+
+        <p id="editActorMentionDropdown{{ form.vars.name }}" class="editActorMentionDropdown" style="display:none;">
+            {{ form_label(form.actor) }}
+            {{ form_widget(form.actor) }}
+            {{ form_widget(form.actorText) }}
+        </p>
+        <p id="editInstitutionMentionDropdown{{ form.vars.name }}" class="editInstitutionMentionDropdown" style="display:none;">
+            {{ form_label(form.institution) }}
+            {{ form_widget(form.institution) }}
+            {{ form_widget(form.institutionText) }}
+
+        </p>
+        <p id="editPlaceMentionDropdown{{ form.vars.name }}" class="editPlaceMentionDropdown" style="display:none;">
+            {{ form_label(form.place) }}
+            {{ form_widget(form.place) }}
+            {{ form_widget(form.placeText) }}
+        </p>
+        <p id="editEventPlaceMentionDropdown{{ form.vars.name }}" class="editEventPlaceMentionDropdown" style="display:none;">
+            {{ form_label(form.eventPlace) }}
+            {{ form_widget(form.eventPlace) }}
+            {{ form_widget(form.eventPlaceText) }}
+        </p>
+        <p id="editSourceMentionDropdown{{ form.vars.name }}" class="editSourceMentionDropdown" style="display:none;">
+            {{ form_label(form.mentioned_source) }}
+            {{ form_widget(form.mentioned_source) }}
+        </p>
+
 {% endblock %}

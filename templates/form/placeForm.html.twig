@@ -1,35 +1,6 @@
 {# templates/form/actionform.html.twig #}
 
-{% block _actor_places_entry_widget %}
-        <p>
-            {{ form_label(form.place) }}
-            {{ form_errors(form.place) }}
-            {{ form_widget(form.place) }}
-            {{ form_help(form.place) }}
-        </p>
-        <p>
-            {{ form_label(form.type) }}
-            {{ form_errors(form.type) }}
-            {{ form_widget(form.type) }}
-            {{ form_help(form.type) }}
-        </p>
-        <p>
-            {{ form_label(form.text_date_of_arrival) }}
-            {{ form_errors(form.text_date_of_arrival) }}
-            {{ form_widget(form.text_date_of_arrival) }}
-            {{ form_help(form.text_date_of_arrival) }}
-        </p>
-        <p>
-            {{ form_label(form.text_date_of_leaving) }}
-            {{ form_errors(form.text_date_of_leaving) }}
-            {{ form_widget(form.text_date_of_leaving) }}
-            {{ form_help(form.text_date_of_leaving) }}
-        </p>
-        <p>
-            {{ form_label(form.type) }}
-            {{ form_errors(form.type) }}
-            {{ form_widget(form.type) }}
-            {{ form_help(form.type) }}
-        </p>
-    </li>
+{% block _place_image_row %}
+    {{ form_widget(form.fileContents) }}
+    <label for="place_image_fileContents" class="fileLabel"><strong>Choose an image </strong><span class="box__dragndrop"> or drag it here</span>.</label>
 {% endblock %}

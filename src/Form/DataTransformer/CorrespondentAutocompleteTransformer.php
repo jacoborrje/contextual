@@ -8,51 +8,39 @@
 namespace App\Form\DataTransformer;
 
 use Symfony\Component\Form\DataTransformerInterface;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
-use App\Entity\Actor;
+use App\Entity\Correspondent;
 
-class ActorAutocompleteTransformer implements DataTransformerInterface
+class CorrespondentAutocompleteTransformer implements DataTransformerInterface
 {
     private $entityManager;
 
-    public function __construct(ObjectManager $entityManager)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
     }
 
-    public function transform($actor)
+    public function transform($correspondent)
     {
-        if (null === $actor) {
+        if (null === $correspondent) {
             return '';
         }
 
-        echo "reverseTransform!<br>";
-
-        return $actor->getSurname().", ".$actor->getFirstName();
+        return $correspondent->getId();
     }
 
-    public function reverseTransform($actorName)
+    public function reverseTransform($correspondentId)
     {
-        if (!$actorName) {
-            return null;
-        }
+        $correspondent = $this->entityManager
+            ->getRepository(Correspondent::class)->findOneBy(array('id' => $correspondentId));
 
-        $actorNames = explode (", ", $actorName);
-        $first_name = $actorNames[1];
-        $surname = $actorNames[0];
-
-        $actor = $this->entityManager
-            ->getRepository(Actor::class)->findOneBy(array('first_name' => $first_name, 'surname' => $surname));
-
-        if (null === $actor) {
-            throw new TransformationFailedException(sprintf('Actor "%s" does not exist',
-                $actorName
+        if (null === $correspondent) {
+            throw new TransformationFailedException(sprintf('Correspondent "%s" does not exist',
+                $correspondentId
             ));
         }
-        echo "transform!<br>";
 
-
-        return $actor;
+        return $correspondent;
     }
 }

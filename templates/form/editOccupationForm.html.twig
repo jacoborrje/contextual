@@ -1,11 +1,21 @@
 {# templates/form/actionform.html.twig #}
 
-{% block _actor_primaryRelationships_entry_widget %}
+{% block _actor_occupations_entry_widget %}
         <p>
-            {{ form_label(form.type) }}
-            {{ form_errors(form.type) }}
-            {{ form_widget(form.type) }}
-            {{ form_help(form.type) }}
+            {{ form_label(form.occupation) }}
+            {{ form_errors(form.occupation) }}
+            {{ form_widget(form.occupation) }}
+            {{ form_help(form.occupation) }}
+            {{ form_widget(form.occupation_text) }}
+
+        </p>
+        <p>
+            {{ form_label(form.institution) }}
+            {{ form_errors(form.institution) }}
+            {{ form_widget(form.institution) }}
+            {{ form_help(form.institution) }}
+            {{ form_widget(form.institution_text) }}
+
         </p>
         <p>
             {{ form_label(form.text_start_date) }}
@@ -20,26 +30,4 @@
             {{ form_help(form.text_end_date) }}
         </p>
     </li>
-{% endblock %}
-
-{% block _actor_secondaryRelationships_entry_widget %}
-        <p>
-            {{ form_label(form.type) }}
-            {{ form_errors(form.type) }}
-            {{ form_widget(form.type) }}
-            {{ form_help(form.type) }}
-        </p>
-        <p>
-            {{ form_label(form.text_start_date) }}
-            {{ form_errors(form.text_start_date) }}
-            {{ form_widget(form.text_start_date) }}
-            {{ form_help(form.text_start_date) }}
-        </p>
-        <p>
-            {{ form_label(form.text_end_date) }}
-            {{ form_errors(form.text_end_date) }}
-            {{ form_widget(form.text_end_date) }}
-            {{ form_help(form.text_end_date) }}
-        </p>
-        </li>
 {% endblock %}

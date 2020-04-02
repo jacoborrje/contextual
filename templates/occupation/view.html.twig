@@ -1,19 +1,34 @@
 {% extends 'base.html.twig' %}
-{% block title %}Research database -> topics -> {{ topic.topic }} {% endblock %}
+{% block title %}Research database -> occupations -> {{ occupation.name }} {% endblock %}
 
 {% block body %}
 
     <div id="index_area">
-        <h1>{{ topic.topic }}</h1>
-        {% if(topic.sources|length>0) %}
-        <h3>Sources with this topic:</h3>
+        <h1>{{ occupation.name }} <span class="editLink"><a href="{{ path('occupation_edit', {'occupation_id':occupation.id}) }}">[edit]</a></h1>
+        {% if(occupation.actorsWithOccupation|length>0) %}
+        <h3>Actors who have had this occupation:</h3>
         <ul>
-        {% for sourceTopic in topic.sources %}
-            <li> <a href="{{ path('source_edit', {'source_id':sourceTopic.source.id}) }}">{{ sourceTopic.source.title }}</a></li>
+        {% for actorOccupation in occupation.actorsWithOccupation %}
+            <li> <a href="{{ path('actor_view', {'actor_id':actorOccupation.actor.id}) }}">{{ actorOccupation.actor.firstName }} {{ actorOccupation.actor.surname }}</a>
+                was a {{ occupation.name }}
+                {% if actorOccupation.institution %}
+                at <a href="{{ path('institution_view', {'institution_id':actorOccupation.institution.id}) }}">{{ actorOccupation.institution.name }}</a>
+                {% endif %}
+
+                {% if (actorOccupation.textEndDate is not null) %}
+                    {% if ((actorOccupation.textEndDate is not null)) %}
+                        from {{ actorOccupation.textStartDate }} to {{ actorOccupation.textEndDate }}.
+                    {% endif %}
+                {% elseif actorOccupation.textStartDate is not null %}
+                    from {{ actorOccupation.textStartDate }}.
+                {% else %}
+                    .
+                {% endif %}
+            </li>
         {% endfor %}
         </ul>
         {% else %}
-            <h3>There are no sources with this topic yet.</h3>
+            <h3>There are no actors with this occupation yet.</h3>
         {% endif %}
     </div>
 

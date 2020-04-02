@@ -1,6 +1,6 @@
-{# templates/form/seriesForm.html.twig #}
+{# templates/form/volumeForm.html.twig #}
 
-{% block _series_widget %}
+{% block _volume_widget %}
 <p>
     {{ form_label(form.name) }}
     {{ form_errors(form.name) }}
@@ -26,6 +26,7 @@
     {{ form_help(form.text_end_date) }}
 </p>
     <p>
-    {{ form_widget(form.submit) }}
+        {{ form_widget(form.series) }}
+        {{ form_widget(form.submit) }}
     </p>
 {% endblock %}

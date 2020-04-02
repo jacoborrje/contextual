@@ -1,42 +1,33 @@
-{# templates/form/actionform.html.twig #}
+{# templates/form/seriesForm.html.twig #}
 
-{% block _source_actions_entry_widget %}
-        <p>
-            {{ form_widget(form.id) }}
-        </p>
-        <p>
-            {{ form_label(form.text_start_date) }}
-            {{ form_errors(form.text_start_date) }}
-            {{ form_widget(form.text_start_date) }}
-            {{ form_help(form.text_start_date) }}
-
-            {{ form_label(form.text_end_date) }}
-            {{ form_errors(form.text_end_date) }}
-            {{ form_widget(form.text_end_date) }}
-            {{ form_help(form.text_end_date) }}
-        </p>
-        <p>
-            {{ form_label(form.correspondent) }}
-            {{ form_errors(form.correspondent) }}
-            {{ form_widget(form.correspondent) }}
-            {{ form_help(form.correspondent) }}
-
-            {{ form_label(form.type) }}
-            {{ form_errors(form.type) }}
-            {{ form_widget(form.type) }}
-            {{ form_help(form.type) }}
-        </p>
-        <p>
-            {{ form_label(form.place) }}
-            {{ form_errors(form.place) }}
-            {{ form_widget(form.place) }}
-            {{ form_help(form.place) }}
-        </p>
-        <p>
-            {{ form_label(form.description) }}
-            {{ form_errors(form.description) }}
-            {{ form_widget(form.description) }}
-            {{ form_help(form.description) }}
-        </p>
-    </li>
+{% block _series_widget %}
+<p>
+    {{ form_label(form.name) }}
+    {{ form_errors(form.name) }}
+    {{ form_widget(form.name) }}
+    {{ form_help(form.name) }}
+</p>
+<p>
+    {{ form_label(form.abbreviation) }}
+    {{ form_errors(form.abbreviation) }}
+    {{ form_widget(form.abbreviation) }}
+    {{ form_help(form.abbreviation) }}
+</p>
+<p>
+    {{ form_label(form.text_start_date) }}
+    {{ form_errors(form.text_start_date) }}
+    {{ form_widget(form.text_start_date) }}
+    {{ form_help(form.text_start_date) }}
+</p>
+<p>
+    {{ form_label(form.text_end_date) }}
+    {{ form_errors(form.text_end_date) }}
+    {{ form_widget(form.text_end_date) }}
+    {{ form_help(form.text_end_date) }}
+</p>
+<p>
+    {{ form_widget(form.parent) }}
+    {{ form_widget(form.archive) }}
+    {{ form_widget(form.submit) }}
+</p>
 {% endblock %}

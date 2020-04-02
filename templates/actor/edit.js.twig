@@ -1,117 +1,126 @@
 <script>
 
-$( function() {
-    $( "#tabs" ).tabs();
-} );
-$( function() {
-    $( "#tabs2" ).tabs();
+
+    $( function() {
+    $( "#tabs" ).tabs()
 } );
 
-var frm = $('form[name="source"]');
-frm.trackChanges();
-// TODO: Fix source change tracking.
 
-var $collectionHolder, $collectionHeader, $topicHolder, $newTopicSpan, $mentionsHolder, $mentionsHeader;
-
-// setup an "add a tag" link
-var $addActionButton = $('<a href="#" class="add_action_link"><img src="{{ asset('images/add_18.png') }}" alt="Add source action" title ="Add source action"/></a>');
-var $addTopicButton = $('<a href="#" class="add_topic_link"><img src="{{ asset('images/add_18.png') }}" alt="Add source topic" title ="Add source topic"/></a>');
-var $addMentionButton = $('<a href="#" class="add_mention_link"><img src="{{ asset('images/add_18.png') }}" alt="Add source mention" title ="Add source mention"/></a>');
+    var frm = $('form[name="source"]');
+    frm.trackChanges();
+    {# TODO: Fix source change tracking.#}
 
 
-var $newLinkLi = $addActionButton;
-var $newMentionsLi = $('<li></li>');
+    var $collectionHolder, $collectionHeader, $occupationHolder, $occupationHeader, $placeHolder, $placeHeader;
 
-jQuery(document).ready(function() {
+    // setup an "add a tag" link
+    var $addRelationshipButton = $('<a href="#" class="add_relationship_link"><img src="{{ asset('images/add_18.png') }}" alt="Add relationship" title ="Add relationship"/></a>');
+    var $addOccupationButton = $('<a href="#" class="add_occupation_link"><img src="{{ asset('images/add_18.png') }}" alt="Add occupation" title ="Add occupation"/></a>');
+    var $addPlaceButton = $('<a href="#" class="add_place_link"><img src="{{ asset('images/add_18.png') }}" alt="Add place" title ="Add place"/></a>');
+
+    jQuery(document).ready(function() {
     /******************/
-    /* Set up actions */
+    /* Set up relationships */
     /******************/
 
-    // Get the ul that holds the collection of tags
-    $collectionHolder = $('ul#sourceActions');
-    $collectionHeader = $('h3.actionsHeader');
+    // Get the ul that holds the collections
+    $collectionHolder = $('ul#relationships');
+    $collectionHeader = $('h3.relationshipsHeader');
+
+    $occupationHolder = $('ul#occupations');
+    $occupationHeader = $('h3.occupationsHeader');
+
+    $placeHolder = $('ul#places');
+    $placeHeader = $('h3.placesHeader');
+
+
     // add the "add a tag" anchor and li to the tags ul
-    $collectionHeader.append($newLinkLi);
+    $collectionHeader.append($addRelationshipButton);
+    $occupationHeader.append($addOccupationButton);
+    $placeHeader.append($addPlaceButton);
+
 
     // count the current form inputs we have (e.g. 2), use that as the new
     // index when inserting a new item (e.g. 2)
-    $collectionHolder.data('index', $collectionHolder.find(':input').length);
+    $collectionHolder.data('index', $collectionHolder.find('li.relationshipForm').length);
+    $occupationHolder.data('index', $occupationHolder.find('li.occupationForm').length);
+    $placeHolder.data('index', $placeHolder.find('li.placeForm').length);
 
-    $addActionButton.on('click', function(e) {
+
+    $addRelationshipButton.on('click', function(e) {
         // add a new tag form (see next code block)
-        addActionForm($collectionHolder);
+        addForm($collectionHolder);
+
+        index = $collectionHolder.data('index') -1;
+        actorAutocomplete($('#actor_primaryRelationships_'+index+'_actor2_text'), $('#actor_primaryRelationships_'+index+'_actor2'), '{{ path('actor_autocomplete')}}')
+
+
+        $(function(){
+            function log( message ) {
+                $( "<div>" ).text( message ).prependTo( "#log" );
+                $( "#log" ).scrollTop( 0 );
+                }
+
+                $(".actorRelationshipInput").each(function() {
+                $(this).autocomplete({
+                source: "{{ path('actor_autocomplete') }}",
+                minLength: 2,
+                select: function( event, ui ) {
+                log( ui.item ?
+                "Selected: " + ui.item.value + " aka " + ui.item.id :
+                "Nothing selected, input was " + this.value );
+            },
+            change: function( event, ui ) {
+                $(this).val( ui.item? ui.item.value : "" );
+        }
     });
+});
+});
+
+});
+
+    $addOccupationButton.on('click', function(e) {
+        // add a new tag form (see next code block)
+        addForm($occupationHolder);
+        index = $occupationHolder.data('index') -1;
+        institutionAutocomplete($('#actor_occupations_'+index+'_institution_text'), $('#actor_occupations_'+index+'_institution'), '/autocomplete/institution');
+        occupationAutocomplete($('#actor_occupations_'+index+'_occupation_text'), $('#actor_occupations_'+index+'_occupation'), '/autocomplete/occupation');
+    });
+
+    $addPlaceButton.on('click', function(e) {
+    // add a new tag form (see next code block)
+    addForm($placeHolder);
+    index = $placeHolder.data('index') -1;
+    placeAutocomplete($('#actor_places_'+index+'_place_text'), $('#actor_places_'+index+'_place'), '/autocomplete/place');
+
+});
 
     $collectionHolder.find('li').each(function() {
-        addActionFormDeleteLink($(this));
-    });
+    addDeleteLink($(this));
+});
 
-    /******************/
-    /* Set up topics  */
-    /******************/
-    $newTopicSpan = $('#newTopic');
-    $topicHolder = $('#sourceTopics');
-    $topicHolder.data('index', $topicHolder.find('input').length);
+    $occupationHolder.find('li').each(function() {
+    addDeleteLink($(this));
+});
 
-    $addTopicButton.on('click', function(e) {
-        // add a new topic form (see next code block)
-        addTopicForm($topicHolder, $newTopicSpan);
-    });
-    $newTopicSpan.append($addTopicButton);
-
-    $topicHolder.find('span').each(function() {
-        addTopicFormDeleteLink($(this));
-    });
-
-    /*******************/
-    /* Set up mentions */
-    /*******************/
-
-    $mentionsHolder = $('ul#sourceMentions');
-    $mentionsHeader = $('h3.mentionsHeader');
-
-    $mentionsHeader.append($addMentionButton);
-
-    // count the current form inputs we have (e.g. 2), use that as the new
-    // index when inserting a new item (e.g. 2)
-    $mentionsHolder.data('index', $mentionsHolder.find('li').length/3);
-
-
-    $mentionsHolder.find('li.mention_preview').each(function() {
-        addMentionFormDeleteLink($(this));
-    });
-
-    $mentionsHolder.find('li.mentionCheckBoxes').each(function(){
-        var $actorCheck = $(this).find('input.actorCheck');
-        if($actorCheck.is(':checked')){
-            $actorCheck.parent().parent().next().find('.editActorMentionDropdown').attr('style','table-row')
-        }
-        var $institutionCheck = $(this).find('input.institutionCheck');
-        if($institutionCheck.is(':checked')){
-            $institutionCheck.parent().parent().next().find('.editInstitutionMentionDropdown').attr('style','table-row')
-        }
-        var $placeCheck = $(this).find('input.placeCheck');
-        if($placeCheck.is(':checked')){
-            $placeCheck.parent().parent().next().find('.editPlaceMentionDropdown').attr('style','table-row')
-        }
-        var $sourceCheck = $(this).find('input.sourceCheck');
-        if($sourceCheck.is(':checked')){
-            $sourceCheck.parent().parent().next().find('.editSourceMentionDropdown').attr('style','table-row')
-        }
-
-
-    });
-
-    $addMentionButton.on('click', function(e) {
-        // add a new tag form (see next code block)
-        addMentionForm($mentionsHolder);
-    });
-
+    $placeHolder.find('li').each(function() {
+    addDeleteLink($(this));
+});
 
 
 });
 
-function addActionForm($collectionHolder) {
+    function addDeleteLink($tagFormLi) {
+    var $removeFormButton = $('<a href="#">delete</a>');
+    $tagFormLi.append($removeFormButton);
+
+    $removeFormButton.on('click', function(e) {
+    // remove the li for the tag form
+    $tagFormLi.remove();
+});
+}
+
+    function addForm($collectionHolder) {
     // Get the data-prototype explained earlier
     var prototype = $collectionHolder.data('prototype');
 
@@ -125,171 +134,32 @@ function addActionForm($collectionHolder) {
     $collectionHolder.data('index', index + 1);
 
     // Display the form in the page in an li, before the "Add a tag" link li
-    var $newFormLi = $('<li class="actionForm"></li>').append(newForm);
+    var $newFormLi = $('<li></li>').append(newForm);
     $collectionHolder.append($newFormLi);
     // add a delete link to the new form
-    addActionFormDeleteLink($newFormLi);
+    addDeleteLink($newFormLi);
 }
 
-function addActionFormDeleteLink($tagFormLi) {
-    var $removeFormButton = $('<a href="#">delete</a>');
-    $tagFormLi.append($removeFormButton);
-
-    $removeFormButton.on('click', function(e) {
-        // remove the li for the tag form
-        $tagFormLi.remove();
-    });
-}
-
-function addTopicForm($topicHolder) {
-    // Get the data-prototype explained earlier
-    var prototype = $topicHolder.data('prototype');
-
-    // get the new index
-    var index = $topicHolder.data('index');
-
-    var newForm = prototype;
-    newForm = newForm.replace(/__name__/g, index);
-
-    // Display the form in the page in an li, before the "Add a tag" link li
-
-    var $newFormLi = $('<span class="source_topic"></span>').append(newForm);
-    var textContent = $('#new_source_topic_topic').val();
-    $newFormLi.append(textContent);
-
-    // increase the index with one for the next item
-    $topicHolder.data('index', index + 1);
-
-    $topicHolder.append($newFormLi);
-
-    // set the correct value of the new topic
-    $('#source_sourceTopics_' + index + '_topic').val($('#new_source_topic_topicId').val());
-
-    $('#new_source_topic_topicId').val("");
-    $('#new_source_topic_topic').val("");
-
-    // add a delete link to the new form
-    addTopicFormDeleteLink($newFormLi);
-}
-
-function addTopicFormDeleteLink($topicFormLi) {
-    var $removeFormButton = $('<a href="#"> x</a>');
-    $topicFormLi.append($removeFormButton);
-
-    $removeFormButton.on('click', function(e) {
-        // remove the li for the tag form
-        $topicFormLi.remove();
-    });
-}
-
-function addMentionForm($mentionHolder) {
-    // Get the data-prototype explained earlier
-    var prototype = $mentionHolder.data('prototype');
-
-    // get the new index
-    var index = $mentionHolder.data('index');
-
-    var newForm = prototype;
-    newForm = newForm.replace(/__name__/g, index);
-
-    // increase the index with one for the next item
-    $mentionHolder.data('index', index + 1);
-
-    // Display the form in the page in an li, before the "Add a tag" link li
-    var $newMentionPreviewLi = $('#mention_index__preview').clone();
-    $newMentionPreviewLi.attr("id", $newMentionPreviewLi.attr("id").replace(/_index_/g, index));
-    $newMentionPreviewLi.html($newMentionPreviewLi.html().replace(/_index_/g, index));
-    $newMentionPreviewLi.removeClass("hidden");
-    $newMentionPreviewLi.addClass("mention_preview");
-
-
-    var $newMentionCheckboxesLi = $('#mentionCheckBoxes_index_').clone();
-    $newMentionCheckboxesLi.attr("id", $newMentionCheckboxesLi.attr("id").replace(/_index_/g, index));
-    $newMentionCheckboxesLi.html($newMentionCheckboxesLi.html().replace(/_index_/g, index));
-    $newMentionCheckboxesLi.removeClass("hidden");
-    $newMentionCheckboxesLi.addClass("mentionCheckboxes");
-
-    var $newMentionFormLi = $('<li id="mention'+index+'" class="newMention"></li>').append(newForm);
-
-    $mentionHolder.append($newMentionPreviewLi);
-    $mentionHolder.append($newMentionCheckboxesLi);
-    $mentionHolder.append($newMentionFormLi);
-    addMentionFormDeleteLink($newMentionPreviewLi, index);
-
-
-    // add a delete link to the new form
-}
-
-function addMentionFormDeleteLink($previewli) {
-    var $removeFormButton = $('<a href="#">delete</a>');
-    $previewli.append($removeFormButton);
-    var $checkboxesli = $previewli.next();
-    var $mentionformli = $checkboxesli.next();
-
-    $removeFormButton.on('click', function(e) {
-        // remove the li for the tag form
-        $previewli.remove();
-        $checkboxesli.remove();
-        $mentionformli.remove();
-    });
-}
-
-$(function(){
+    $(function(){
     function log( message ) {
         $( "<div>" ).text( message ).prependTo( "#log" );
         $( "#log" ).scrollTop( 0 );
     }
 
-    $("#new_source_topic_topic").autocomplete({
-        source: "{{ path('topic_autocomplete') }}",
-        minLength: 2,
-        focus: function( event, ui ) {
-            $("#new_source_topic_topic").val( ui.item.topic? ui.item.topic : "" );
-            $( "#new_source_topic_topicId" ).val( ui.item.id? ui.item.id : "" );
-            return false;
-        },
-        select: function( event, ui ) {
-            log( ui.item.topic ?
-                "Selected: " + ui.item.topic + " aka " + ui.item.id :
-                "Nothing selected, input was " + this.value );
-            return false;
-        }
-    })
-        .autocomplete( "instance" )._renderItem = function( ul, item ) {
-        return $( "<li>" )
-            .append( "<div>" + item.topic + "</div>" )
-            .appendTo( ul );
-    };
+    $(".placeInput").each(function() {
+    $(this).autocomplete({
+    source: "{{ path('place_autocomplete') }}",
+    minLength: 2,
+    select: function( event, ui ) {
+    log( ui.item ?
+    "Selected: " + ui.item.value + " aka " + ui.item.id :
+    "Nothing selected, input was " + this.value );
+},
+    change: function( event, ui ) {
+    $(this).val( ui.item? ui.item.value : "" );
+}
+});
+});
 });
 
-
-var $form = $('.box');
-
-var isAdvancedUpload = function() {
-    var div = document.createElement('div');
-    return (('draggable' in div) || ('ondragstart' in div && 'ondrop' in div)) && 'FormData' in window && 'FileReader' in window;
-}();
-
-if (isAdvancedUpload) {
-    $form.addClass('has-advanced-upload');
-
-    var droppedFiles = false;
-
-    $form.on('drag dragstart dragend dragover dragenter dragleave drop', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    })
-        .on('dragover dragenter', function() {
-            $form.addClass('is-dragover');
-        })
-        .on('dragleave dragend drop', function() {
-            $form.removeClass('is-dragover');
-        })
-        .on('drop', function(e) {
-            $("input[type='file']")
-                .prop("files", e.originalEvent.dataTransfer.files)  // put files into element
-                .closest("form")
-                .submit();  // autosubmit as well
-        });
-}
 </script>

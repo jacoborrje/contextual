@@ -8,43 +8,42 @@
 namespace App\Form\DataTransformer;
 
 use Symfony\Component\Form\DataTransformerInterface;
-use Doctrine\Common\Persistence\ObjectManager;
-use Symfony\Component\Form\Exception\TransformationFailedException;
-use App\Entity\Place;
+use Doctrine\ORM\EntityManagerInterface;
 
-class PlaceAutocompleteTransformer implements DataTransformerInterface
+class TimeTransformer implements DataTransformerInterface
 {
     private $entityManager;
 
-    public function __construct(ObjectManager $entityManager)
+    public function __construct()
     {
-        $this->entityManager = $entityManager;
+
     }
 
-    public function transform($place)
+    public function transform($integerTime)
     {
-        if (null === $place) {
+        if (null === $integerTime || $integerTime === '') {
             return '';
         }
 
-        return $place->getName();
+        $hours = intdiv($integerTime, 60);
+        $minutes = $integerTime % 60;
+        if($minutes === 0)
+            $minutes = "00";
+
+        return $hours .":".$minutes;
     }
 
-    public function reverseTransform($placeName)
+    public function reverseTransform($textTime)
     {
-        if (!$placeName) {
+        if (!$textTime || $textTime === '') {
             return null;
         }
 
-        $place = $this->entityManager
-            ->getRepository(Place::class)->findOneBy(array('name' => $placeName));
+        $timeArray = explode(":", $textTime);
+        $hours = $timeArray[0];
+        $minutes = $timeArray[1];
 
-        if (null === $place) {
-            throw new TransformationFailedException(sprintf('The place "%s" does not exist in the database',
-                $placeName
-            ));
-        }
+        return $hours * 60 + $minutes;
 
-        return $place;
     }
 }

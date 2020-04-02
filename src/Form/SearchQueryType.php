@@ -12,20 +12,19 @@ namespace App\Form;
 use App\Entity\ImportURL;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-
-
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use App\Entity\SearchQuery;
 
-class ImportURLType extends \Symfony\Component\Form\AbstractType
+class SearchQueryType extends \Symfony\Component\Form\AbstractType
 {
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('url', TextType::class)
+            ->add('queryText', TextType::class, array('label' => false))
             ->add('submit', SubmitType::class, array('label' => 'Submit'))
         ;
     }
@@ -33,7 +32,7 @@ class ImportURLType extends \Symfony\Component\Form\AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => ImportURL::class,
+            'data_class' => SearchQuery::class,
         ));
     }
 

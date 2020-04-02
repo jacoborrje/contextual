@@ -9,48 +9,32 @@
 
 namespace App\Form;
 
-use App\Form\DataTransformer\ArrayToUploadableFileTransformer;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use App\Entity\PdfFile;
-use Vich\UploaderBundle\Form\Type\VichFileType;
-use Vich\UploaderBundle\Entity\File;
+use App\Entity\DatabaseFile;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 
-class PdfFileType extends AbstractType
+class ImageFileType extends AbstractType
 {
-    private $transformer;
-
-    public function __construct(ArrayToUploadableFileTransformer $transformer)
-    {
-        $this->transformer = $transformer;
-    }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder
-            ->add('fileContents', VichFileType::class, [
-                    'multiple' => true,
-                    'label' => false,
-                    'allow_delete' => true,
-                    'download_uri' => true,
-                    'attr' => array(
-                        'class' => "box__file")
-                    ]
-            );
-        $builder->addModelTransformer($this->transformer);
+        $builder->add('fileContents', FileType::class, [
+            'attr' => ['class' => 'box__file']
+        ]);
     }
 
-
-    public function setDefaultOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => PdfFile::class,
+            'data_class' => DatabaseFile::class,
         ));
     }
+
     public function getName()
     {
-        return 'PdfFile';
+        return 'ImageFileType';
     }
 
 }

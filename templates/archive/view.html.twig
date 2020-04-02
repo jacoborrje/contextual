@@ -1,20 +1,60 @@
 {% extends 'base.html.twig' %}
-{% block title %}Research database -> archives{% endblock %}
+{% block title %}Research database -> archives -> {{ archive.name }} {% endblock %}
+
 {% block body %}
+    {% form_theme childSeriesForm 'form/seriesForm.html.twig' %}
+    {% form_theme childArchiveForm 'form/archiveForm.html.twig' %}
+
+
+    <div id="index_area">
+
+        {% if archive.parent %}
+            Parent archive:
+            <a href="{{ path('archive_view', {'archive_id':archive.parent.id}) }}">
+                {{ archive.parent.name }}
+            </a>
+        {% endif %}
+
+        <h1>{{ archive.name }}</h1>
+        {% if archive.institutions|length>0 %}
+            Related institution(s):
+            <ul>
+            {% for institution in archive.institutions %}
+                <li><a href="{{ path('institution_view', {'institution_id':institution.id}) }}">{{ institution.name }}</a></li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        {% if archive.children|length > 0 %}
+        {% import "archive/archiveHierarchy.html.twig" as list %}
+        {{ list.archiveHierary(archive.children) }}
+        {% endif %}
+
+        {% if archive.series|length > 0 %}
+        {% import "series/seriesHierarchy.html.twig" as seriesList %}
+        {{ seriesList.seriesHierarchy(archive.series) }}
+        {% endif %}
+
+    </div>
+    <div id="childForms">
+        <h3>Create child archive</h3>
+        {{ form_start(childArchiveForm, {'attr': {'novalidate': 'novalidate'}}) }}
+        {{ form_widget(childArchiveForm) }}
+        {{ form_widget(childArchiveForm._token) }}
+        {{ form_end(childArchiveForm, {'render_rest': false}) }}
+
+        <h3>Create child series</h3>
+        {{ form_start(childSeriesForm, {'attr': {'novalidate': 'novalidate'}}) }}
+        {{ form_widget(childSeriesForm) }}
+        {{ form_widget(childSeriesForm._token) }}
+        {{ form_end(childSeriesForm, {'render_rest': false}) }}
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
     <script type="text/javascript">
         function confirmDelete() {
             return confirm('Are you sure you want to delete this archive?');
         }
     </script>
-
-    <div id="index_area">
-        {% import "archive/archiveHierarchy.html.twig" as list %}
-        {{ list.archiveHierary(archives) }}
-    </div>
-
-
-        {#<h3>Create new Archive</h3>
-        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-        {{ form_widget(form) }}
-        {{ form_end(form) }}#}
 {% endblock %}

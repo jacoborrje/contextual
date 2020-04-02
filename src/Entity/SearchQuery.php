@@ -2,31 +2,39 @@
 
 namespace App\Entity;
 
-class ImportURL
+class SearchQuery
 {
 
-    private $url;
+    private $queryText;
 
 
     function __toString()
     {
-        return $this->url;
+        return $this->queryText;
     }
 
     /**
      * @return mixed
      */
-    public function getUrl()
+    public function getQueryText()
     {
-        return $this->url;
+        return $this->queryText;
+    }
+
+    /**
+     * @param mixed $queryText
+     */
+    public function setQueryText($queryText): void
+    {
+        $this->queryText = $queryText;
     }
 
     /**
      * @param mixed $url
      */
-    public function setUrl($url)
+    public function setUrl($queryText)
     {
-        $this->url = $url;
+        $this->queryText = $queryText;
     }
 
 }

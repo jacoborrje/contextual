@@ -1,0 +1,11 @@
+{% block mentionsCheckboxes %}
+    <li id="mentionCheckBoxes{{ loop.index0 }}" class="mentionCheckBoxes">
+        <p>
+            <label>Actor</label><input type="checkbox" name="actor"  {% if mentionForm.vars.value.actor is not null %} checked {% endif %} value="actorCheck" id="actorCheck{{ loop.index0 }}" class="actorCheck" onclick="toggleDropdownActivation(this, $('#editActorMentionDropdown{{ loop.index0 }}'),'table-row'); actorAutocomplete($('#editActorMentionDropdown{{ loop.index0 }}'))">
+            <label>Institution</label><input type="checkbox" name="institution"  {% if mentionForm.vars.value.institution is not null %} checked {% endif %} value="institutionCheck" id="institutionCheck{{ loop.index0 }}" class="institutionCheck" onclick="toggleDropdownActivation(this, $('#editInstitutionMentionDropdown{{ loop.index0 }}'),'table-row')">
+            <label>Place</label><input type="checkbox" name="place" {% if mentionForm.vars.value.place is not null %} checked {% endif %} value="placeCheck" id="placeCheck{{ loop.index0 }}" class="placeCheck" onclick="toggleDropdownActivation(this, $('#editPlaceMentionDropdown{{ loop.index0 }}'),'table-row')">
+            <label>Event place</label><input type="checkbox" name="eventPlace" {% if mentionForm.vars.value.eventPlace is not null %} checked {% endif %} value="eventPlaceCheck" id="eventPlaceCheck{{ loop.index0 }}" class="eventPlaceCheck" onclick="toggleDropdownActivation(this, $('#editEventPlaceMentionDropdown{{ loop.index0 }}'),'table-row')">
+            <label>Source</label><input type="checkbox" name="source" {% if mentionForm.vars.value.mentionedSource is not null %} checked {% endif %} value="sourceCheck" id="sourceCheck{{ loop.index0 }}" class="sourceCheck" onclick="toggleDropdownActivation(this, $('#editSourceMentionDropdown{{ loop.index0 }}'),'table-row')">
+        </p>
+    </li>
+{% endblock %}

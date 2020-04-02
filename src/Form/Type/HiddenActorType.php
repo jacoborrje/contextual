@@ -9,14 +9,16 @@
 namespace App\Form\Type;
 
 
-use App\Form\DataTransformer\HiddenToTopicTransformer;
+use App\Form\DataTransformer\HiddenToActorTransformer;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Actor;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class SourceTopicTopicType extends AbstractType
+class HiddenActorType extends AbstractType
 {
     protected $em;
 
@@ -26,8 +28,8 @@ class SourceTopicTopicType extends AbstractType
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options) {
-        $hiddenToTopicTransformer = new HiddenToTopicTransformer($this->em);
-        $builder->addModelTransformer($hiddenToTopicTransformer);
+        $hiddenToActorTransformer = new HiddenToActorTransformer($this->em);
+        $builder->addModelTransformer($hiddenToActorTransformer);
     }
 
     public function getParent() {
@@ -35,7 +37,14 @@ class SourceTopicTopicType extends AbstractType
     }
 
     public function getName() {
-        return 'SourceTopicTopic';
+        return 'HiddenActor';
+    }
+
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults(array(
+            'data_class' => Actor::class,
+        ));
     }
 
 }

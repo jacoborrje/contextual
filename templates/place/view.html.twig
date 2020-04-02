@@ -1,53 +1,83 @@
 {% extends 'base.html.twig' %}
-{% block title %}Research database -> institutions -> {{ institution.name }} {% endblock %}
+{% block title %}Research database -> places -> {{ place.name }} {% endblock %}
 
-{% block body %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link href='https://api.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css' rel='stylesheet' />
+{% endblock %}
 
-    <div id="index_area">
-        <h1>{{ institution.name }}</h1>
-        <h3>Research notes</h3>
-        <p>
-            {{ institution.researchNotes|raw }}
-        </p>
-        <h3>Mentions of the institution</h3>
-        <a>
-            {% for mention in institution.mentions %}
-            Mentioned in {{ mention.infoSource.title }}, sent by
-            {% for author in mention.infosource.authors %}
-            {% if author.correspondent.institution is not null %}
-            <a href="{{ path('institution_view', {'institution_id':author.correspondent.institution.id}) }}">
-                {% else %}
-                <a href="{{ path('institution_view', {'institution_id':author.correspondent.institution.id}) }}">
-                    {% endif %}
-                    {% if not loop.last %}
-                    {{ author.correspondent }}</a>,
-                {% elseif not loop.first %}
-                and {{ author.correspondent }}</a>
-            {% else %}
-            {{ author.correspondent }}
-        </a>
-        {% endif %}
-        {% endfor %}
-        in {{ mention.infoSource.textDate }}
-        {% endfor %}
+{% block javascripts %}
+    {{ parent() }}
 
-
-        {% if institution.actions %}
-            <h3>Related sources</h3>
-            <ul>
-                {% for action in institution.actions %}
-                    <?php foreach ($actions as $action): ?>
-                    <li>
-                        {{ action.textStartDate }}
-                        <?php echo $action['start_date'];?>,
-                        {{ action.typeVerbImperfect }}
-                        <a href="{{ path('source_edit', {'source_id':action.source.id}) }}"><em>{{ action.source.title }}</em></a>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-
-    </div>
+    {# Map libraries #}
+    <script src='https://api.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js'></script>
+    <script src="{{ asset('/js/mapFunctions.js') }}"></script>
+    {# ---------------------------------------- #}
 
 {% endblock %}
 
+{% block body %}
+    <div id="place_index">
+        <h1>{{ place.name }} <span class="editLink"><a href="{{ path('place_edit', {'place_id':place.id}) }}">[edit]</a></h1>
+        {% if place.parent %}
+            <p>Parent: <a href="{{ path('place_view', {'place_id':place.parent.id}) }}">{{ place.parent }}</a></p>
+        {% endif %}
+        {% if place.image %}
+        <p>
+            <img src="{{ asset('placeimages/' ~ place.image) }}">
+        </p>
+        {% endif %}
+        {% if(place.institutions|length > 0) or (place.actors|length > 0) %}
+            Residents at this place:
+            <ul>
+                {% if(place.institutions|length > 0)%}
+                    {% for institution in place.institutions %}
+                        <li><a href="{{ path('institution_view', {'institution_id':institution.id} ) }}">{{ institution.name }}</a></li>
+                    {% endfor %}
+                {% endif %}
+                {% if(place.actors|length > 0)%}
+                    {% for actor in place.actors %}•
+                        <li><a href="{{ path('actor_view', {'actor_id':actor.actor.id} ) }}">{{ actor.actor.firstName }} {{ actor.actor.surname }}</a></li>
+                    {% endfor %}
+                {% endif %}
+            </ul>
+
+        {% endif %}
+        {% if place.description %}
+            <p>{{ place.description|raw }}</p>
+        {% endif %}
+        <p>
+            [{{ place.lng }} , {{ place.lat }}]
+        </p>
+
+        <h2>Places <a href="{{ path('place_create', {'parent_id':place.id} ) }}" title="Add child place" alt="Add child place"><img src="{{ asset('images/add_18.png') }}"></a></h2>
+        {% import "place/placeHierarchy.html.twig" as list %}
+        {{ list.placeHierary(place.children) }}
+
+    </div>
+    <div id='map'></div>
+
+{% endblock %}
+
+{% block customJavascripts %}
+    {# Page specific javascript#}
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiamFjb2JvcnJqZSIsImEiOiJjanFtOWtwbmg2a2YwNDNwcGg2cG1sZzN1In0.c11tDOxEs5T5YHgbO0TAKg';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/jacoborrje/cjslfs6640gc61gk4nrw1hagf',
+            center: [{{ place.lng }},{{ place.lat }}],
+            zoom: 12
+        });
+
+        map.on("load", function(){
+            var placegeojson = getGeojsonView({{ place.id }});
+            placeMapMarkers(placegeojson, true);
+
+            var geojson = getGeojsonDecendantPlaces({{ place.id }});
+            placeMapMarkers(geojson);
+            getOverlayMap({{ place.id }});
+        });
+    </script>
+    {# ---------------------------------------- #}
+{% endblock %}

@@ -11,39 +11,106 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
-use App\Entity\Place;
+use Symfony\Component\HttpFoundation\Request;
+use App\Entity\Topic;
+use App\Form\TopicType;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
-
-class PlaceController extends AbstractController
+class TopicController extends AbstractController
 {
     /**
-    *   @Route("/places/index", name="place_index")
+    *   @Route("/topics/index", name="topic_index")
     */
-    public function index(){
+    public function index(Request $request){
 
         $repository = $this->getDoctrine()
-            ->getRepository(Place::class);
+            ->getRepository(Topic::class);
 
-        $root_places = $repository->findAllRootPlaces();
-        $all_places = $repository->findAll();
+        $all_topics = $repository->findAll();
 
-        return $this->render('place/index.html.twig', [
-            'places' => $root_places,
-            'all_places' => $all_places
+
+
+        $form = $this->createForm(TopicType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // $form->getData() holds the submitted values
+            // but, the original `$task` variable has also been updated
+            $task = $form->getData();
+
+            // ... perform some action, such as saving the task to the database
+            // for example, if Task is a Doctrine entity, save it!
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($task);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('topic_index');
+        }
+
+        return $this->render('topic/index.html.twig', [
+            'all_topics' => $all_topics,
+            'form' => $form->createView()
+
         ]);
     }
 
 
     /**
-     *   @Route("/archive/view/{archive_id}", name="archive_view")
+     *   @Route("/topic/view/{topic_id}", name="topic_view")
      */
-    public function view($archive_id){
+    public function view($topic_id){
         $repository = $this->getDoctrine()
-            ->getRepository(Archive::class);
-        $archive = $repository->find($archive_id);
+            ->getRepository(Topic::class);
+        $topic = $repository->find($topic_id);
 
-        return $this->render('archive/view.html.twig', [
-            'archive' => $archive,
+        return $this->render('topic/view.html.twig', [
+            'topic' => $topic,
         ]);
+    }
+
+    /**
+     *   @Route("/topic/delete/{topic_id}", name="topic_delete")
+     */
+    public function delete($topic_id){
+        $entityManager = $this->getDoctrine()->getManager();
+        $topic = $entityManager->getRepository(Topic::class)->find($topic_id);
+
+        if (!$topic) {
+            throw $this->createNotFoundException(
+                'No topic found for id '.$id
+            );
+        }
+
+        $entityManager->remove($topic);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('topic_index');
+    }
+
+    /**
+     * @Route("/autocomplete/topic", name="topic_autocomplete")
+     */
+    public function autocompleteAction(Request $request)
+    {
+        $names = array();
+        $term = trim(strip_tags($request->get('term')));
+
+        $em = $this->getDoctrine()->getManager();
+
+        $entities = $em->getRepository(Topic::class)->createQueryBuilder('c')
+            ->where('c.topic LIKE :topic')
+            ->setParameter('topic', '%'.$term.'%')
+            ->getQuery()
+            ->getResult();
+
+        foreach ($entities as $entity)
+        {
+            $names[] = ['id' => $entity->getId(), 'topic' => $entity->getTopic()];
+        }
+
+        $response = new JsonResponse();
+        $response->setData($names);
+
+        return $response;
     }
 }

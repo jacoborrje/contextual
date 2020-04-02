@@ -3,19 +3,14 @@
 {% block body %}
 
     <div id="index_area">
-        <h3>Occupations</h3>
+        <h1>Institutions <a href="{{ path('institution_create') }}" title="Add new institution" alt="Add new institution"><img src="{{ asset('images/add_18.png') }}"></a></h1>
             <ul>
-                {% for occupation in all_occupations %}
-                    <li>{{ occupation.name }}</li>
+                {% for institution in all_institutions %}
+                    <li>
+                        <a href="{{ path('institution_view', {'institution_id':institution.id}) }}">{{ institution.name }}</a>
+                        <a href="{{ path('institution_delete', {'institution_id':institution.id}) }}" onclick="return confirmDelete('institution');"><img src="{{ asset('images/delete.png') }}" title="delete" alt="delete"></a>
+                    </li>
                 {% endfor %}
             </ul>
     </div>
-    <div id="mapid"></div>
-
-
-
-    {#<h3>Create new Archive</h3>
-    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-    {{ form_widget(form) }}
-    {{ form_end(form) }}#}
 {% endblock %}

@@ -4,8 +4,18 @@
 {% block body %}
 
     <div id="index_area">
-        {% if(foundSources) %}
-        <h2>Search results:</h2>
+
+        <div id="searchForm">
+            <h3>Search the database</h3>
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            {{ form_widget(form) }}
+            {{ form_widget(form._token) }}
+            {{ form_end(form, {'render_rest': false}) }}
+        </div>
+
+
+        {% if foundSources %}
+        <h2> {{ foundSources|length }} results for "{{ searchQuery }}":</h2>
         <table class="object_table">
             {% for result in foundSources %}
                 {% set source = result[0] %}
@@ -23,6 +33,8 @@
                 </tr>
                 {% endfor %}
         </table>
+        {% elseif searchQuery %}
+            <h2>Found no results for "{{ searchQuery }}":</h2>
         {% endif %}
     </div>
 

@@ -9,13 +9,13 @@
 namespace App\Form\Type;
 
 
-use App\Form\DataTransformer\ActorAutocompleteTransformer;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use App\Form\DataTransformer\CorrespondentAutocompleteTransformer;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-class ActorAutocompleteType extends AbstractType
+class CorrespondentAutocompleteType extends AbstractType
 {
     protected $em;
 
@@ -25,7 +25,7 @@ class ActorAutocompleteType extends AbstractType
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options) {
-        $autocompleteTransformer = new ActorAutocompleteTransformer($this->em);
+        $autocompleteTransformer = new CorrespondentAutocompleteTransformer($this->em);
 
         $builder
             ->addModelTransformer($autocompleteTransformer)
@@ -33,11 +33,11 @@ class ActorAutocompleteType extends AbstractType
     }
 
     public function getParent() {
-        return TextType::class;
+        return HiddenType::class;
     }
 
     public function getName() {
-        return 'RelationshipActor';
+        return 'CorrespondentType';
     }
 
 }

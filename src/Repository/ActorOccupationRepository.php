@@ -4,7 +4,8 @@ namespace App\Repository;
 
 use App\Entity\ActorOccupation;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Persistence\ManagerRegistry;
+
 
 /**
  * @method ActorOccupation|null find($id, $lockMode = null, $lockVersion = null)
@@ -14,7 +15,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class ActorOccupationRepository extends ServiceEntityRepository
 {
-    public function __construct(RegistryInterface $registry)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, ActorOccupation::class);
     }

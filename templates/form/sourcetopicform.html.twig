@@ -1,1 +1,5 @@
 {# templates/form/sourcetopicform.html.twig #}
+{% block _source_sourceTopics_entry_widget %}
+    {{ form_widget(form.id) }}
+    {{ form_widget(form.topic) }}
+{% endblock %}

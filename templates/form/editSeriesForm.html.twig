@@ -14,6 +14,18 @@
     {{ form_help(form.abbreviation) }}
 </p>
 <p>
+    {{ form_label(form.parent) }}
+    {{ form_errors(form.parent) }}
+    {{ form_widget(form.parent) }}
+    {{ form_help(form.parent) }}
+</p>
+<p>
+    {{ form_label(form.archive) }}
+    {{ form_errors(form.archive) }}
+    {{ form_widget(form.archive) }}
+    {{ form_help(form.archive) }}
+</p>
+<p>
     {{ form_label(form.text_start_date) }}
     {{ form_errors(form.text_start_date) }}
     {{ form_widget(form.text_start_date) }}
@@ -25,7 +37,19 @@
     {{ form_widget(form.text_end_date) }}
     {{ form_help(form.text_end_date) }}
 </p>
-    <p>
+<p>
+    {{ form_label(form.description) }}
+    {{ form_errors(form.description) }}
+    {{ form_widget(form.description) }}
+    {{ form_help(form.description) }}
+</p>
+<p>
+    {{ form_label(form.research_notes) }}
+    {{ form_errors(form.research_notes) }}
+    {{ form_widget(form.research_notes) }}
+    {{ form_help(form.research_notes) }}
+</p>
+<p>
     {{ form_widget(form.submit) }}
-    </p>
+</p>
 {% endblock %}

@@ -15,71 +15,35 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Source;
-use App\Entity\Actor;
-use App\Entity\Place;
-use App\Entity\Volume;
+use App\Entity\SearchQuery;
 
-
-
-class HomeController extends AbstractController
+class SearchController extends AbstractController
 {
     /**
-    *   @Route("/", name="home_index")
-    */
-    public function index(Request $request){
-        $sourceRepository = $this->getDoctrine()
-            ->getRepository(Source::class);
-
-        $actorRepository = $this->getDoctrine()
-            ->getRepository(Actor::class);
-
-        $placeRepository = $this->getDoctrine()
-            ->getRepository(Place::class);
-
-        $volumeRepository = $this->getDoctrine()
-            ->getRepository(Volume::class);
-
-        $lastSources = $sourceRepository->findLastEdited(5);
-        $lastActors = $actorRepository->findLastEdited(5);
-        $lastPlaces = $placeRepository->findLastEdited(5);
-        $lastVolumes = $volumeRepository->findLastEdited(5);
-
-
-        $form = $this->createForm(SearchQueryType::class);
-
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-
-        }
-
-        return $this->render('home/index.html.twig', [
-            'lastSources' => $lastSources,
-            'lastActors' => $lastActors,
-            'lastPlaces' => $lastPlaces,
-            'lastVolumes' => $lastVolumes
-        ]);
-    }
-
-    /**
-     *   @Route("/search/", name="home_search")
+     *   @Route("/search/", name="search")
      */
-    public function search()
+    public function search(Request $request)
     {
         $sourceRepository = $this->getDoctrine()
             ->getRepository(Source::class);
 
-        $foundSources = $sourceRepository->findFulltext($search_query);
 
         $form = $this->createForm(SearchQueryType::class);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $search_query = $form->getData();
+            $foundSources = $sourceRepository->findFulltext($search_query);
+        }
+        else{
+            $search_query = "";
+            $foundSources = null;
         }
 
-        return $this->render('home/search.html.twig', [
+        return $this->render('search/search.html.twig', [
             'foundSources' => $foundSources,
-            'searchQuery' => $search_query
+            'searchQuery' => $search_query,
+            'form' => $form->createView()
         ]);
     }
 }

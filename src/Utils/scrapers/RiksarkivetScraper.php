@@ -6,89 +6,80 @@
  * Time: 21:00
  */
 
-defined('BASEPATH') OR exit('No direct script access allowed');
+namespace App\Utils\Scrapers;
+use Goutte\Client;
+use Symfony\Component\DomCrawler\Crawler;
+use App\Utils\FileUploader;
 
-require_once APPPATH."libraries/Scraper_base.php";
 
-class Riksarkivet_scraper extends Scraper_base
+use App\Utils\ScraperBase;
+
+class RiksarkivetScraper extends ScraperBase
 {
-
-    public function __construct($parameters)
-    {
-        parent::__construct($parameters);
-    }
-
-
-    public function connect()
-    {
-        return parent::connect();
-    }
 
     public function parse()
     {
-        $baseurl = $this->url;
-        $debug = true;
-        // Use TagFilter to parse the content.
+        $this->debug = false;
 
-        $html = TagFilter::Explode($this->result["body"], $this->htmloptions);
+        $this->crawler = $this->crawler->filter(".cssIndentTable")->last();
 
-        // Retrieve a pointer object to the root node.
-        $root = $html->Get();
-
-        $tables = $root->Find(".cssIndentTable");
-        $table = null;
-        foreach($tables as $candidate){
-            $table = $candidate;
-        }
-
-        $headers = $table->Find("td.subTblGridHCell");
+        $headers = $this->crawler->filter("td.subTblGridHCell");
 
         $header_num = 0;
-        $header_names = array();
+        $this->header_names = array();
         foreach($headers as $header){
-            $header_names[$header_num] = $header->GetPlainText();
+            $this->header_names[$header_num] = $header->textContent;
             $header_num++;
         }
 
-        $rows = $table->Find("tr[class^='subTblGridRow']");
 
-        $row_num = 0;
-        $data = array();
-        foreach ($rows as $row){
+        $rows = $this->crawler->filter("tr[class^='subTblGridRow']");
+
+        $this->row_num = 0;
+        $this->column_num = 0;
+        $this->data = array();
+
+        $rows->each(function (Crawler $row, $i) {
             // Somewhat slower access.
-            if($row_num>0) {
-            $columns = $row->Find("td.subTblGridCellList");
-                if($debug) echo "<b> Row ".$row_num."</b><br>";
-            $column_num = 0;
-            foreach ($columns as $column) {
-                if($debug){echo $column->GetPlainText().", <br>";}
-                if (strcmp($header_names[$column_num], "Referenskod")=== 0 ) {
-                    $data[$row_num]['abbreviation'] = trim($column->GetPlainText());
-                }
-                else if (strcmp($header_names[$column_num], "Titel")=== 0 ) {
-                    $data[$row_num]['name'] = $column->GetPlainText();
-                }
-                else if (strcmp($header_names[$column_num], "Tid")=== 0 ) {
-                    if($column->Child(0)) {
-                        $year_field = $column->Child(0)->GetInnerHTML();
-                        if(strpos($year_field, "&ndash;")){
-                            $year_array = explode("&ndash;", $year_field);
-                            $data[$row_num]['start_date'] = trim($year_array[0]);
-                            $data[$row_num]['end_date'] = trim($year_array[1]);
-                        }
-                        else{
-                            $data[$row_num]['start_date'] = trim($year_field);
+            if($this->row_num>0) {
+                if($this->debug) echo "<b> Row ".$this->row_num."</b><br>";
+                $this->column_num = 0;
+                $row->filter('td')->each(function (Crawler $column, $i) {
+                    if($this->debug){echo $column->text().", <br>";}
+                    if (strcmp($this->header_names[$this->column_num], "Referenskod")=== 0 ) {
+                        $this->data[$this->row_num]['abbreviation'] = trim($column->text());
+                    }
+                    else if (strcmp($this->header_names[$this->column_num], "Titel")=== 0 ) {
+                        $this->data[$this->row_num]['name'] = $column->text();
+                    }
+                    else if (strcmp($this->header_names[$this->column_num], "Tid")=== 0 ) {
+                        if($column->children(0)) {
+                            $year_field = $column->children(0)->text();
+                            if(strpos($year_field, "–")){
+                                $year_array = explode("–", $year_field);
+                                if(strpos($year_array[0], "talet")!==false)
+                                    $year_array[0] = substr($year_array[0], 0,4);
+                                if(strpos($year_array[1], "talet")!==false)
+                                    $year_array[1] = substr($year_array[1], 0,4);
+                                $this->data[$this->row_num]['start_date'] = trim($year_array[0]);
+                                $this->data[$this->row_num]['end_date'] = trim($year_array[1]);
+                            }
+                            else{
+                                $year_field = trim($year_field);
+                                if(strpos($year_field, "talet")!== false)
+                                    $year_field = substr($year_field, 0,4);
+                                $this->data[$this->row_num]['start_date'] = $year_field;
+                            }
                         }
                     }
-                }
-                else if(strcmp($header_names[$column_num], "Anmärkning")=== 0 ) {
-                    $data[$row_num]['description'] = $column->GetInnerHTML();
-                }
-                $column_num++;
+                    else if(strcmp($this->header_names[$this->column_num], "Anmärkning")=== 0 ) {
+                        $this->data[$this->row_num]['description'] = $column->text();
+                    }
+                    $this->column_num++;
+            });
             }
-            }
-            $row_num++;
-        }
-        return $data;
+            $this->row_num++;
+        });
+        return $this->data;
     }
 }

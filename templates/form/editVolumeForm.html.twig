@@ -25,8 +25,10 @@
     {{ form_widget(form.text_end_date) }}
     {{ form_help(form.text_end_date) }}
 </p>
-    <p>
-        {{ form_widget(form.series) }}
-        {{ form_widget(form.submit) }}
-    </p>
+<p>
+    {{ form_label(form.series) }}
+    {{ form_errors(form.series) }}
+    {{ form_widget(form.series) }}
+    {{ form_help(form.series) }}
+</p>
 {% endblock %}

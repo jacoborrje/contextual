@@ -9,14 +9,14 @@
 namespace App\Form\Type;
 
 
-use App\Form\DataTransformer\ActorAutocompleteTransformer;
+use App\Form\DataTransformer\CorrespondentAutocompleteTransformer;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-class RelationshipActorType extends AbstractType
+class SourceCorrespondentType extends AbstractType
 {
     protected $em;
 
@@ -26,7 +26,7 @@ class RelationshipActorType extends AbstractType
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options) {
-        $autocompleteTransformer = new ActorAutocompleteTransformer($this->em);
+        $autocompleteTransformer = new CorrespondentAutocompleteTransformer($this->em);
 
         $builder
             ->addModelTransformer($autocompleteTransformer)

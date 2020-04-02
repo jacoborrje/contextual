@@ -1,13 +1,16 @@
 {% extends 'base.html.twig' %}
-{% block title %}Research database -> edit place{% endblock %}
+{% block title %}Research database -> edit occupation{% endblock %}
 {% block body %}
 
-        <h3>Edit place</h3>
-    <ul>
+    <div id="index_area">
+        <h1>Edit occupation</h1>
+
+        <ul>
         <li>
             {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
             {{ form_widget(form) }}
             {{ form_end(form) }}
         </li>
     </ul>
+    </div>
 {% endblock %}

@@ -1,0 +1,7 @@
+# src/Acme/DemoBundle/Resources/config/vich_uploader/Entity.File.yml
+App\Entity\File:
+    file:
+        mapping: file        # required
+        filename_property: name  # required
+        size: size
+        mime_type: mimeType

@@ -1,25 +1,51 @@
 {% extends 'base.html.twig' %}
-{% block title %}Research database -> archives{% endblock %}
+{% block title %}Research database -> preferences{% endblock %}
 {% block body %}
 
     <div id="index_area">
-        <h1>Topics</h1>
-            <ul>
-                {% for topic in all_topics %}
-                    <li>
-                        <a href="{{ path('topic_view', {'topic_id':topic.id}) }}">{{ topic.topic }}</a> ({{ topic.numberOfSources }})
-                        <a href="{{ path('topic_delete', {'topic_id':topic.id}) }}" onclick="return confirmDelete('topic');"><img src="{{ asset('images/delete.png') }}" title="delete" alt="delete"></a>
-                    </li>
-                {% endfor %}
-            </ul>
+        <h1>Preferences</h1>
+
+        <h3>Text analysis</h3>
+        <a href="{{ path('preferences_generateStopwordSuggestions') }}">
+            Generate stopword suggestions.
+        </a><br>
+        <a href="{{ path('preferences_generateLemmatizationDraft') }}">
+            Generate Lemmatization Drafts.
+        </a>
+
+        <h3>Machine learning</h3>
+        <p>
+            <a href="{{ path('preferences_retrainTopicModels') }}">
+                Retrain topic suggestion models.
+            </a><br>
+
+
+
+        </p>
+
+        <h3>Database maintenance</h3>
+        <p>
+            <a href="{{ path('preferences_mergeActorDuplicates') }}">
+                Check for duplicates of actors.
+            </a><br>
+            <a href="{{ path('preferences_purgeDuplicateCorrespondents') }}">
+                Check for duplicates of correspondents.
+            </a><br>
+            <a href="{{ path('preferences_decodeHTMLEntitiesInDatabase') }}">
+                Decode HTML Entities in database.
+            </a>
+
+
+
+        </p>
+
+        <h3>Map overlays</h3>
+        <ul>
+            {% for mapOverlay in mapOverlays %}
+                <li>{{ mapOverlay.name }}<br>
+                <em>{{ mapOverlay.url }}</em></li><br>
+            {% endfor %}
+        </ul>
     </div>
 
-    <h3>Create new Topic</h3>
-    <ul>
-        <li>
-            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-            {{ form_widget(form) }}
-            {{ form_end(form) }}
-        </li>
-    </ul>
 {% endblock %}
